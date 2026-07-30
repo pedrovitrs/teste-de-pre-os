@@ -191,6 +191,10 @@
                     <i class="fa-solid fa-file-invoice-dollar w-5"></i>
                     <span>Resumo Temporal</span>
                 </a>
+                <a href="#passes" onclick="switchTab('passes')" id="nav-passes" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all duration-200">
+                    <i class="fa-solid fa-id-card w-5"></i>
+                    <span>Passes Mensais</span>
+                </a>
             </nav>
         </div>
 
@@ -594,6 +598,60 @@
 
             </div>
 
+            <!-- SECTION 5: TAB PASSES MENSAIS -->
+            <div id="tab-passes" class="tab-content hidden space-y-6">
+
+                <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-brand-500 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Passes Mensais dos Passageiros</h3>
+                        <p class="text-xs text-slate-400 max-w-2xl mt-1">
+                            Cadastre o nome de cada passageiro e o dia do mês em que o passe vence. O status é calculado automaticamente: <strong class="text-emerald-400">verde</strong> enquanto está em dia e <strong class="text-rose-400">vermelho</strong> assim que passar do dia de vencimento — todo mês o ciclo reinicia sozinho.
+                        </p>
+                    </div>
+                    <button onclick="openModal('modal-pass')" class="bg-gradient-to-r from-brand-500 to-brand-600 text-white font-extrabold text-xs px-5 py-3 rounded-xl shadow-lg shadow-brand-500/20 hover:brightness-110 transition flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Novo Passe</span>
+                    </button>
+                </div>
+
+                <!-- Resumo rápido de status -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div class="glass-panel p-4 rounded-2xl flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-400 border border-brand-500/20 flex items-center justify-center">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-slate-400 uppercase font-semibold">Total de Passes</p>
+                            <p id="passes-count-total" class="text-lg font-extrabold text-white">0</p>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-slate-400 uppercase font-semibold">Em Dia</p>
+                            <p id="passes-count-active" class="text-lg font-extrabold text-emerald-400">0</p>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-slate-400 uppercase font-semibold">Vencidos</p>
+                            <p id="passes-count-overdue" class="text-lg font-extrabold text-rose-400">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid de Passes -->
+                <div id="passes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Populated dynamically -->
+                </div>
+
+            </div>
+
         </div>
     </main>
 
@@ -737,6 +795,52 @@
         </div>
     </div>
 
+    <!-- MODAL 3: NOVO/EDITAR PASSE MENSAL -->
+    <div id="modal-pass" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
+        <div class="glass-panel bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4 shadow-2xl relative">
+
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-id-card text-brand-500"></i>
+                    <span>Novo Passe Mensal</span>
+                </h3>
+                <button onclick="closeModal('modal-pass')" class="text-slate-400 hover:text-white text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="form-pass" onsubmit="handlePassSubmit(event)" class="space-y-4">
+                <input type="hidden" id="pass-edit-id" value="">
+
+                <!-- Nome do Passageiro -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Nome do Passageiro</label>
+                    <input type="text" id="pass-name" placeholder="Ex: Maria da Silva" required class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-xs outline-none focus:border-brand-500">
+                </div>
+
+                <!-- Dia de Vencimento -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Dia do Mês em que Vence</label>
+                    <input type="number" id="pass-due-day" min="1" max="31" step="1" placeholder="Ex: 5, 10, 20" required class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm font-bold outline-none focus:border-brand-500">
+                    <p class="text-[10px] text-slate-400 mt-1">O passe fica vermelho automaticamente assim que esse dia passar, todo mês.</p>
+                </div>
+
+                <!-- Observação -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Observação (opcional)</label>
+                    <input type="text" id="pass-note" placeholder="Ex: Linha 510, telefone, ponto de embarque..." class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-xs outline-none focus:border-brand-500">
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="closeModal('modal-pass')" class="w-1/2 py-3 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition">Cancelar</button>
+                    <button type="submit" id="pass-submit-btn" class="w-1/2 py-3 bg-brand-500 text-white rounded-xl text-xs font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/20">Salvar Passe</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
     </div> <!-- fim #app-root -->
 
     <!-- JAVASCRIPT LOGIC -->
@@ -750,6 +854,7 @@
         // ==================== ESTADO ====================
         let transactions = [];
         let topics = [];
+        let passes = [];
         let currentUser = null;
         let isSignUpMode = false;
         let confirmResolver = null;
@@ -917,6 +1022,7 @@
                 currentUser = null;
                 transactions = [];
                 topics = [];
+                passes = [];
                 document.getElementById('auth-screen').classList.remove('hidden');
                 document.getElementById('app-root').classList.add('hidden');
                 document.getElementById('app-root').classList.remove('flex');
@@ -928,13 +1034,15 @@
         async function loadData() {
             showLoading();
             try {
-                const [{ data: txData, error: txErr }, { data: topicData, error: topicErr }] = await Promise.all([
+                const [{ data: txData, error: txErr }, { data: topicData, error: topicErr }, { data: passData, error: passErr }] = await Promise.all([
                     sb.from('transactions').select('*').order('date', { ascending: false }),
-                    sb.from('topics').select('*').order('created_at', { ascending: true })
+                    sb.from('topics').select('*').order('created_at', { ascending: true }),
+                    sb.from('passes').select('*').order('name', { ascending: true })
                 ]);
 
                 if (txErr) throw txErr;
                 if (topicErr) throw topicErr;
+                if (passErr) throw passErr;
 
                 transactions = (txData || []).map(t => ({
                     id: t.id,
@@ -951,6 +1059,14 @@
                     percent: Number(t.percent),
                     icon: t.icon,
                     color: t.color
+                }));
+
+                passes = (passData || []).map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    dueDay: Number(p.due_day),
+                    note: p.note || '',
+                    lastPaidMonth: p.last_paid_month || null
                 }));
 
                 renderAll();
@@ -1004,6 +1120,9 @@
             } else if (tabId === 'relatorios') {
                 pageTitle.innerText = "Resumo Temporal das Finanças";
                 pageSub.innerText = "Visão comparativa de hoje, semana, mês e ano do faturamento do veículo.";
+            } else if (tabId === 'passes') {
+                pageTitle.innerText = "Passes Mensais dos Passageiros";
+                pageSub.innerText = "Controle quem está em dia e quem está com o passe vencido.";
             }
         }
 
@@ -1031,6 +1150,12 @@
                 document.getElementById('topic-submit-btn').innerText = 'Salvar Tópico';
                 document.querySelector('#modal-topic h3 span').innerText = 'Novo Tópico de Porcentagem';
                 document.getElementById('form-topic').reset();
+            }
+            if (id === 'modal-pass') {
+                document.getElementById('pass-edit-id').value = '';
+                document.getElementById('pass-submit-btn').innerText = 'Salvar Passe';
+                document.querySelector('#modal-pass h3 span').innerText = 'Novo Passe Mensal';
+                document.getElementById('form-pass').reset();
             }
         }
 
@@ -1105,6 +1230,7 @@
             renderTables(filtered);
             renderTemporalReports();
             renderCharts(filtered);
+            renderPasses();
         }
 
         function renderTopicsDashboard(netProfit) {
@@ -1190,6 +1316,185 @@
             document.getElementById('allocation-bar-label').innerText = totalPercent > 100 
                 ? '⚠️ Porcentagem total excede 100%!' 
                 : 'Total Alocado dos Lucros Sobrados';
+        }
+
+        // ==================== PASSES MENSAIS ====================
+        function getCurrentCycleKey() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function getPassStatus(dueDay, lastPaidMonth) {
+            const today = new Date();
+            const currentDay = today.getDate();
+            const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+            const effectiveDueDay = Math.min(dueDay, lastDayOfMonth);
+            const isPaidThisCycle = lastPaidMonth === getCurrentCycleKey();
+            const isOverdueByDate = currentDay > effectiveDueDay;
+            const overdue = isOverdueByDate && !isPaidThisCycle;
+            return {
+                overdue,
+                paid: isPaidThisCycle,
+                label: isPaidThisCycle ? 'Pago' : (overdue ? 'Vencido' : 'Em Dia'),
+                daysUntilDue: effectiveDueDay - currentDay
+            };
+        }
+
+        function renderPasses() {
+            const grid = document.getElementById('passes-grid');
+            grid.innerHTML = '';
+
+            document.getElementById('passes-count-total').innerText = passes.length;
+
+            if (passes.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 text-xs glass-panel rounded-2xl"><i class="fa-solid fa-id-card text-2xl mb-3 block"></i>Nenhum passe cadastrado ainda.</div>`;
+                document.getElementById('passes-count-active').innerText = '0';
+                document.getElementById('passes-count-overdue').innerText = '0';
+                return;
+            }
+
+            let activeCount = 0;
+            let overdueCount = 0;
+
+            const sorted = [...passes].sort((a, b) => a.dueDay - b.dueDay);
+
+            sorted.forEach(p => {
+                const status = getPassStatus(p.dueDay, p.lastPaidMonth);
+                if (status.overdue) overdueCount++; else activeCount++;
+
+                const statusClasses = status.overdue
+                    ? { bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-400', dot: 'bg-rose-500' }
+                    : { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', dot: 'bg-emerald-500' };
+
+                const payButton = status.paid
+                    ? `<button onclick="unmarkPassPaid('${p.id}')" class="w-full text-[11px] font-bold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg py-2 transition flex items-center justify-center gap-2">
+                         <i class="fa-solid fa-rotate-left"></i>
+                         <span>Desfazer Pagamento</span>
+                       </button>`
+                    : `<button onclick="markPassPaid('${p.id}')" class="w-full text-[11px] font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg py-2 transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
+                         <i class="fa-solid fa-check"></i>
+                         <span>Marcar como Pago</span>
+                       </button>`;
+
+                const card = document.createElement('div');
+                card.className = `glass-panel p-5 rounded-2xl border ${statusClasses.border} space-y-4 relative flex flex-col justify-between`;
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div class="w-10 h-10 rounded-xl ${statusClasses.bg} ${statusClasses.text} flex items-center justify-center text-lg font-bold border ${statusClasses.border}">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="editPass('${p.id}')" class="text-slate-500 hover:text-brand-400 text-xs p-1" title="Editar">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button onclick="deletePass('${p.id}')" class="text-slate-500 hover:text-rose-400 text-xs p-1" title="Excluir">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white text-sm truncate">${p.name}</h4>
+                            <p class="text-xs text-slate-400 mt-0.5">Vence todo dia <strong class="text-white">${p.dueDay}</strong> do mês</p>
+                            ${p.note ? `<p class="text-[11px] text-slate-500 mt-1 truncate">${p.note}</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="pt-3 border-t border-slate-800 flex justify-between items-center">
+                        <span class="text-xs text-slate-400">Status:</span>
+                        <span class="flex items-center gap-1.5 text-xs font-extrabold ${statusClasses.text}">
+                            <span class="w-2 h-2 rounded-full ${statusClasses.dot} inline-block"></span>
+                            ${status.label}
+                        </span>
+                    </div>
+                    ${payButton}
+                `;
+                grid.appendChild(card);
+            });
+
+            document.getElementById('passes-count-active').innerText = activeCount;
+            document.getElementById('passes-count-overdue').innerText = overdueCount;
+        }
+
+        async function markPassPaid(id) {
+            try {
+                const { error } = await sb.from('passes').update({ last_paid_month: getCurrentCycleKey() }).eq('id', id);
+                if (error) throw error;
+                await loadData();
+                showToast('Pagamento registrado! Passe marcado como pago.', 'success');
+            } catch (err) {
+                showToast('Erro ao marcar como pago: ' + err.message, 'error');
+            }
+        }
+
+        async function unmarkPassPaid(id) {
+            try {
+                const { error } = await sb.from('passes').update({ last_paid_month: null }).eq('id', id);
+                if (error) throw error;
+                await loadData();
+                showToast('Pagamento desfeito.', 'success');
+            } catch (err) {
+                showToast('Erro ao desfazer pagamento: ' + err.message, 'error');
+            }
+        }
+
+        function editPass(id) {
+            const p = passes.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('pass-edit-id').value = p.id;
+            document.getElementById('pass-name').value = p.name;
+            document.getElementById('pass-due-day').value = p.dueDay;
+            document.getElementById('pass-note').value = p.note || '';
+            document.getElementById('pass-submit-btn').innerText = 'Atualizar Passe';
+            document.querySelector('#modal-pass h3 span').innerText = 'Editar Passe Mensal';
+            openModal('modal-pass');
+        }
+
+        async function handlePassSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('pass-edit-id').value;
+            const name = document.getElementById('pass-name').value.trim();
+            const dueDay = parseInt(document.getElementById('pass-due-day').value, 10);
+            const note = document.getElementById('pass-note').value.trim();
+
+            if (!name || !dueDay || dueDay < 1 || dueDay > 31) return;
+            if (!currentUser) return;
+
+            const btn = document.getElementById('pass-submit-btn');
+            btn.disabled = true;
+            btn.innerText = editId ? 'Atualizando...' : 'Salvando...';
+
+            try {
+                let error;
+                if (editId) {
+                    ({ error } = await sb.from('passes').update({ name, due_day: dueDay, note }).eq('id', editId));
+                } else {
+                    ({ error } = await sb.from('passes').insert({ user_id: currentUser.id, name, due_day: dueDay, note }));
+                }
+                if (error) throw error;
+
+                closeModal('modal-pass');
+                await loadData();
+                showToast(editId ? 'Passe atualizado!' : 'Passe cadastrado!', 'success');
+            } catch (err) {
+                showToast('Erro ao salvar passe: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                const stillEditing = document.getElementById('pass-edit-id').value;
+                btn.innerText = stillEditing ? 'Atualizar Passe' : 'Salvar Passe';
+            }
+        }
+
+        async function deletePass(id) {
+            const ok = await confirmAction('Esse passe será excluído permanentemente.', 'Excluir passe?');
+            if (!ok) return;
+            try {
+                const { error } = await sb.from('passes').delete().eq('id', id);
+                if (error) throw error;
+                await loadData();
+                showToast('Passe excluído.', 'success');
+            } catch (err) {
+                showToast('Erro ao excluir passe: ' + err.message, 'error');
+            }
         }
 
         function buildTransactionRow(tx) {
