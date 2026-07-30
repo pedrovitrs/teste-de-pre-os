@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BusFleet Pro - Gestão Financeira de Ônibus</title>
+    <meta name="description" content="BusFleet Pro — gestão financeira completa para motoristas de ônibus, fretamento e transporte de passageiros.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -72,9 +74,41 @@
             border-color: rgba(2, 132, 199, 0.4);
             box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.1);
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 0.8s linear infinite; }
     </style>
 </head>
 <body class="min-h-screen antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- TOASTS -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[200] flex flex-col gap-2 w-[90vw] max-w-xs"></div>
+
+    <!-- MODAL DE CONFIRMAÇÃO -->
+    <div id="modal-confirm" class="fixed inset-0 z-[150] hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div class="glass-panel bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center border border-rose-500/20 flex-shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white text-sm" id="confirm-title">Confirmar ação</h3>
+                    <p class="text-xs text-slate-400" id="confirm-message">Tem certeza?</p>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="resolveConfirm(false)" class="w-1/2 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition">Cancelar</button>
+                <button onclick="resolveConfirm(true)" class="w-1/2 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OVERLAY DE CARREGAMENTO -->
+    <div id="loading-overlay" class="fixed inset-0 z-[90] hidden items-center justify-center bg-[#090d16]/90 backdrop-blur-sm">
+        <div class="flex flex-col items-center gap-3">
+            <div class="w-10 h-10 border-4 border-slate-700 border-t-brand-500 rounded-full animate-spin"></div>
+            <p class="text-xs text-slate-400 font-semibold">Carregando seus dados...</p>
+        </div>
+    </div>
 
     <!-- ==================== TELA DE LOGIN / CADASTRO ==================== -->
     <div id="auth-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#090d16] p-4">
@@ -97,12 +131,20 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">Senha</label>
-                    <input type="password" id="auth-password" placeholder="••••••••" required minlength="6"
-                        class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm outline-none focus:border-brand-500">
+                    <div class="relative">
+                        <input type="password" id="auth-password" placeholder="••••••••" required minlength="6"
+                            class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 pr-10 text-sm outline-none focus:border-brand-500">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-0 top-0 h-full px-3 text-slate-400 hover:text-white text-xs">
+                            <i class="fa-solid fa-eye" id="auth-password-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <button type="submit" id="auth-submit-btn"
-                    class="w-full py-3 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-xl text-sm font-bold transition shadow-lg shadow-brand-500/20">
-                    Entrar
+                    class="w-full py-3 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-xl text-sm font-bold transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
+                    <span>Entrar</span>
+                </button>
+                <button type="button" id="auth-forgot-btn" onclick="handleForgotPassword()" class="w-full text-[11px] text-slate-500 hover:text-slate-300 text-center transition">
+                    Esqueceu a senha?
                 </button>
             </form>
 
@@ -395,6 +437,24 @@
                     </button>
                 </div>
 
+                <!-- Busca, Filtro e Exportação -->
+                <div class="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                        <input type="text" id="tx-search" oninput="renderAll()" placeholder="Buscar por categoria ou descrição..."
+                            class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl pl-9 pr-3 py-2.5 text-xs outline-none focus:border-brand-500">
+                    </div>
+                    <select id="tx-filter-type" onchange="renderAll()" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold rounded-xl px-3 py-2.5 outline-none focus:border-brand-500 cursor-pointer">
+                        <option value="all">Todos os Tipos</option>
+                        <option value="income">Somente Entradas</option>
+                        <option value="expense">Somente Saídas</option>
+                    </select>
+                    <button onclick="exportCSV()" class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition whitespace-nowrap">
+                        <i class="fa-solid fa-file-csv text-emerald-400"></i>
+                        <span>Exportar CSV</span>
+                    </button>
+                </div>
+
                 <!-- Complete Table -->
                 <div class="glass-panel rounded-2xl overflow-hidden">
                     <div class="overflow-x-auto">
@@ -552,7 +612,8 @@
             </div>
 
             <form id="form-transaction" onsubmit="handleTransactionSubmit(event)" class="space-y-4">
-                
+                <input type="hidden" id="tx-edit-id" value="">
+
                 <!-- Tipo de Transação -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">Tipo de Operação</label>
@@ -623,7 +684,8 @@
             </div>
 
             <form id="form-topic" onsubmit="handleTopicSubmit(event)" class="space-y-4">
-                
+                <input type="hidden" id="topic-edit-id" value="">
+
                 <!-- Nome do Tópico -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">Nome do Tópico</label>
@@ -690,20 +752,88 @@
         let topics = [];
         let currentUser = null;
         let isSignUpMode = false;
+        let confirmResolver = null;
 
         let chartPerformance = null;
         let chartTopics = null;
 
+        // ==================== TOASTS ====================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const colors = {
+                success: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', icon: 'fa-circle-check' },
+                error: { bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-400', icon: 'fa-circle-exclamation' },
+                info: { bg: 'bg-brand-500/10', border: 'border-brand-500/30', text: 'text-brand-400', icon: 'fa-circle-info' }
+            };
+            const c = colors[type] || colors.info;
+            const toast = document.createElement('div');
+            toast.className = `glass-panel ${c.bg} ${c.border} ${c.text} border rounded-xl px-4 py-3 text-xs font-semibold flex items-center gap-2 shadow-lg`;
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-8px)';
+            toast.innerHTML = `<i class="fa-solid ${c.icon}"></i><span class="flex-1">${message}</span>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.style.transition = 'opacity 0.25s, transform 0.25s';
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            });
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-8px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3800);
+        }
+
+        // ==================== MODAL DE CONFIRMAÇÃO ====================
+        function confirmAction(message, title = 'Confirmar exclusão') {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-message').innerText = message;
+            document.getElementById('modal-confirm').classList.remove('hidden');
+            document.getElementById('modal-confirm').classList.add('flex');
+            return new Promise(resolve => { confirmResolver = resolve; });
+        }
+
+        function resolveConfirm(result) {
+            document.getElementById('modal-confirm').classList.add('hidden');
+            document.getElementById('modal-confirm').classList.remove('flex');
+            if (confirmResolver) { confirmResolver(result); confirmResolver = null; }
+        }
+
+        // ==================== LOADING OVERLAY ====================
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            document.getElementById('loading-overlay').classList.add('flex');
+        }
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+            document.getElementById('loading-overlay').classList.remove('flex');
+        }
+
         // ==================== AUTENTICAÇÃO ====================
+        function togglePasswordVisibility() {
+            const input = document.getElementById('auth-password');
+            const eye = document.getElementById('auth-password-eye');
+            if (input.type === 'password') {
+                input.type = 'text';
+                eye.classList.remove('fa-eye');
+                eye.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                eye.classList.remove('fa-eye-slash');
+                eye.classList.add('fa-eye');
+            }
+        }
+
         function toggleAuthMode() {
             isSignUpMode = !isSignUpMode;
-            document.getElementById('auth-submit-btn').innerText = isSignUpMode ? 'Cadastrar' : 'Entrar';
+            document.getElementById('auth-submit-btn').querySelector('span').innerText = isSignUpMode ? 'Cadastrar' : 'Entrar';
             document.getElementById('auth-toggle').innerHTML = isSignUpMode
                 ? 'Já tem conta? <span class="text-brand-400 font-semibold">Entrar</span>'
                 : 'Não tem conta? <span class="text-brand-400 font-semibold">Cadastre-se</span>';
             document.getElementById('auth-subtitle').innerText = isSignUpMode
                 ? 'Crie sua conta para começar'
                 : 'Entre para acessar sua gestão financeira';
+            document.getElementById('auth-forgot-btn').classList.toggle('hidden', isSignUpMode);
             hideAuthMessage();
         }
 
@@ -727,10 +857,11 @@
             const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value;
             const btn = document.getElementById('auth-submit-btn');
+            const btnLabel = btn.querySelector('span');
 
             hideAuthMessage();
             btn.disabled = true;
-            btn.innerText = 'Aguarde...';
+            btnLabel.innerText = 'Aguarde...';
 
             try {
                 let result;
@@ -750,7 +881,22 @@
                 showAuthMessage(err.message || 'Erro ao autenticar. Tente novamente.');
             } finally {
                 btn.disabled = false;
-                btn.innerText = isSignUpMode ? 'Cadastrar' : 'Entrar';
+                btnLabel.innerText = isSignUpMode ? 'Cadastrar' : 'Entrar';
+            }
+        }
+
+        async function handleForgotPassword() {
+            const email = document.getElementById('auth-email').value.trim();
+            if (!email) {
+                showAuthMessage('Digite seu e-mail no campo acima para recuperar a senha.');
+                return;
+            }
+            try {
+                const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+                if (error) throw error;
+                showAuthMessage('Enviamos um link de redefinição de senha para o seu e-mail.', 'success');
+            } catch (err) {
+                showAuthMessage(err.message || 'Erro ao solicitar redefinição de senha.');
             }
         }
 
@@ -778,8 +924,9 @@
             }
         });
 
-        // ==================== CARREGAR / SALVAR DADOS NO SUPABASE ====================
+        // ==================== CARREGAR DADOS NO SUPABASE ====================
         async function loadData() {
+            showLoading();
             try {
                 const [{ data: txData, error: txErr }, { data: topicData, error: topicErr }] = await Promise.all([
                     sb.from('transactions').select('*').order('date', { ascending: false }),
@@ -809,7 +956,9 @@
                 renderAll();
             } catch (err) {
                 console.error('Erro ao carregar dados do Supabase:', err);
-                alert('Não foi possível carregar os dados. Verifique se as tabelas foram criadas no Supabase.\n\n' + err.message);
+                showToast('Não foi possível carregar os dados. Verifique se as tabelas existem no Supabase.', 'error');
+            } finally {
+                hideLoading();
             }
         }
 
@@ -861,13 +1010,28 @@
         function openModal(id) {
             document.getElementById(id).classList.remove('hidden');
             if (id === 'modal-transaction') {
-                document.getElementById('tx-date').value = getFormattedDate(0);
-                toggleCategoryOptions();
+                const editId = document.getElementById('tx-edit-id').value;
+                if (!editId) {
+                    document.getElementById('tx-date').value = getFormattedDate(0);
+                    toggleCategoryOptions();
+                }
             }
         }
 
         function closeModal(id) {
             document.getElementById(id).classList.add('hidden');
+            if (id === 'modal-transaction') {
+                document.getElementById('tx-edit-id').value = '';
+                document.getElementById('tx-submit-btn').innerText = 'Salvar Lançamento';
+                document.querySelector('#modal-transaction h3 span').innerText = 'Lançar Entrada ou Saída';
+                document.getElementById('form-transaction').reset();
+            }
+            if (id === 'modal-topic') {
+                document.getElementById('topic-edit-id').value = '';
+                document.getElementById('topic-submit-btn').innerText = 'Salvar Tópico';
+                document.querySelector('#modal-topic h3 span').innerText = 'Novo Tópico de Porcentagem';
+                document.getElementById('form-topic').reset();
+            }
         }
 
         function toggleCategoryOptions() {
@@ -908,6 +1072,19 @@
             });
         }
 
+        function applyLancamentosFilters(list) {
+            const searchEl = document.getElementById('tx-search');
+            const typeEl = document.getElementById('tx-filter-type');
+            if (!searchEl || !typeEl) return list;
+            const search = searchEl.value.trim().toLowerCase();
+            const typeFilter = typeEl.value;
+            return list.filter(t => {
+                const matchesSearch = !search || t.category.toLowerCase().includes(search) || (t.desc || '').toLowerCase().includes(search);
+                const matchesType = typeFilter === 'all' || t.type === typeFilter;
+                return matchesSearch && matchesType;
+            });
+        }
+
         function renderAll() {
             const currentPeriod = document.getElementById('filter-period').value;
             const filtered = filterTransactionsByPeriod(currentPeriod);
@@ -935,6 +1112,11 @@
             const mgtGrid = document.getElementById('topics-management-grid');
             grid.innerHTML = '';
             mgtGrid.innerHTML = '';
+
+            if (topics.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-6 text-slate-500 text-xs"><i class="fa-solid fa-inbox text-lg mb-2 block"></i>Nenhum tópico criado ainda.</div>`;
+                mgtGrid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 text-xs"><i class="fa-solid fa-pie-chart text-2xl mb-3 block"></i>Crie seu primeiro tópico de alocação de lucro.</div>`;
+            }
 
             let totalPercent = 0;
             const profitToAllocate = Math.max(0, netProfit);
@@ -980,9 +1162,14 @@
                             <div class="w-10 h-10 rounded-xl ${c.bg} ${c.text} flex items-center justify-center text-lg font-bold border ${c.border}">
                                 <i class="fa-solid ${t.icon}"></i>
                             </div>
-                            <button onclick="deleteTopic('${t.id}')" class="text-slate-500 hover:text-rose-400 text-xs p-1">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
+                            <div class="flex items-center gap-1">
+                                <button onclick="editTopic('${t.id}')" class="text-slate-500 hover:text-brand-400 text-xs p-1" title="Editar">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button onclick="deleteTopic('${t.id}')" class="text-slate-500 hover:text-rose-400 text-xs p-1" title="Excluir">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
                         </div>
                         <div>
                             <h4 class="font-bold text-white text-sm">${t.name}</h4>
@@ -1005,6 +1192,39 @@
                 : 'Total Alocado dos Lucros Sobrados';
         }
 
+        function buildTransactionRow(tx) {
+            const isIncome = tx.type === 'income';
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/50';
+
+            const badge = isIncome
+                ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Entrada</span>`
+                : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">Saída</span>`;
+
+            const formattedDate = new Date(tx.date + 'T00:00:00').toLocaleDateString('pt-BR');
+
+            row.innerHTML = `
+                <td class="p-4 font-medium text-slate-300">${formattedDate}</td>
+                <td class="p-4">${badge}</td>
+                <td class="p-4 font-semibold text-white">${tx.category}</td>
+                <td class="p-4 text-slate-400 max-w-[200px] truncate">${tx.desc || '-'}</td>
+                <td class="p-4 text-right font-extrabold ${isIncome ? 'text-emerald-400' : 'text-rose-400'}">
+                    ${isIncome ? '+' : '-'} ${formatBRL(tx.amount)}
+                </td>
+                <td class="p-4 text-center">
+                    <div class="flex items-center justify-center gap-3">
+                        <button onclick="editTransaction('${tx.id}')" class="text-slate-500 hover:text-brand-400 text-xs transition" title="Editar">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="deleteTransaction('${tx.id}')" class="text-slate-500 hover:text-rose-400 text-xs transition" title="Excluir">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            return row;
+        }
+
         function renderTables(filteredTx) {
             const dashTable = document.getElementById('dashboard-recent-table');
             const fullTable = document.getElementById('full-transactions-table');
@@ -1012,45 +1232,22 @@
             dashTable.innerHTML = '';
             fullTable.innerHTML = '';
 
-            if (filteredTx.length === 0) {
-                const emptyMsg = `<tr><td colspan="6" class="p-6 text-center text-slate-500 text-xs">Nenhum lançamento encontrado para o período selecionado.</td></tr>`;
-                dashTable.innerHTML = emptyMsg;
-                fullTable.innerHTML = emptyMsg;
-                return;
+            const dashSorted = [...filteredTx].sort((a,b) => new Date(b.date) - new Date(a.date));
+            const fullSorted = [...applyLancamentosFilters(filteredTx)].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            const emptyRow = (msg) => `<tr><td colspan="6" class="p-6 text-center text-slate-500 text-xs"><i class="fa-solid fa-inbox text-base mb-2 block"></i>${msg}</td></tr>`;
+
+            if (dashSorted.length === 0) {
+                dashTable.innerHTML = emptyRow('Nenhum lançamento encontrado para o período selecionado.');
+            } else {
+                dashSorted.slice(0, 5).forEach(tx => dashTable.appendChild(buildTransactionRow(tx)));
             }
 
-            // Sort by date desc
-            const sorted = [...filteredTx].sort((a,b) => new Date(b.date) - new Date(a.date));
-
-            sorted.forEach((tx, idx) => {
-                const isIncome = tx.type === 'income';
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/50';
-                
-                const badge = isIncome 
-                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Entrada</span>`
-                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">Saída</span>`;
-
-                const formattedDate = new Date(tx.date + 'T00:00:00').toLocaleDateString('pt-BR');
-
-                row.innerHTML = `
-                    <td class="p-4 font-medium text-slate-300">${formattedDate}</td>
-                    <td class="p-4">${badge}</td>
-                    <td class="p-4 font-semibold text-white">${tx.category}</td>
-                    <td class="p-4 text-slate-400 max-w-[200px] truncate">${tx.desc || '-'}</td>
-                    <td class="p-4 text-right font-extrabold ${isIncome ? 'text-emerald-400' : 'text-rose-400'}">
-                        ${isIncome ? '+' : '-'} ${formatBRL(tx.amount)}
-                    </td>
-                    <td class="p-4 text-center">
-                        <button onclick="deleteTransaction('${tx.id}')" class="text-slate-500 hover:text-rose-400 text-xs p-1 transition" title="Excluir">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-
-                if (idx < 5) dashTable.appendChild(row.cloneNode(true));
-                fullTable.appendChild(row);
-            });
+            if (fullSorted.length === 0) {
+                fullTable.innerHTML = emptyRow('Nenhum lançamento encontrado com os filtros atuais.');
+            } else {
+                fullSorted.forEach(tx => fullTable.appendChild(buildTransactionRow(tx)));
+            }
         }
 
         function renderTemporalReports() {
@@ -1146,9 +1343,68 @@
             });
         }
 
+        // ==================== EXPORTAR CSV ====================
+        function exportCSV() {
+            const currentPeriod = document.getElementById('filter-period').value;
+            const filtered = applyLancamentosFilters(filterTransactionsByPeriod(currentPeriod));
+            if (!filtered.length) {
+                showToast('Nenhum lançamento para exportar com os filtros atuais.', 'error');
+                return;
+            }
+            const header = ['Data', 'Tipo', 'Categoria', 'Descricao', 'Valor'];
+            const rows = filtered.map(t => [
+                t.date,
+                t.type === 'income' ? 'Entrada' : 'Saida',
+                t.category,
+                (t.desc || '').replace(/,/g, ';'),
+                t.amount.toFixed(2)
+            ]);
+            const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `busfleet-lancamentos-${getFormattedDate(0)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('CSV exportado com sucesso!', 'success');
+        }
+
+        // ==================== EDIÇÃO ====================
+        function editTransaction(id) {
+            const tx = transactions.find(t => t.id === id);
+            if (!tx) return;
+            document.getElementById('tx-edit-id').value = tx.id;
+            document.querySelector(`input[name="tx-type"][value="${tx.type}"]`).checked = true;
+            toggleCategoryOptions();
+            document.getElementById('tx-category').value = tx.category;
+            document.getElementById('tx-amount').value = tx.amount;
+            document.getElementById('tx-date').value = tx.date;
+            document.getElementById('tx-desc').value = tx.desc || '';
+            document.getElementById('tx-submit-btn').innerText = 'Atualizar Lançamento';
+            document.querySelector('#modal-transaction h3 span').innerText = 'Editar Lançamento';
+            openModal('modal-transaction');
+        }
+
+        function editTopic(id) {
+            const t = topics.find(x => x.id === id);
+            if (!t) return;
+            document.getElementById('topic-edit-id').value = t.id;
+            document.getElementById('topic-name').value = t.name;
+            document.getElementById('topic-percent').value = t.percent;
+            document.getElementById('topic-icon').value = t.icon;
+            document.getElementById('topic-color').value = t.color;
+            document.getElementById('topic-submit-btn').innerText = 'Atualizar Tópico';
+            document.querySelector('#modal-topic h3 span').innerText = 'Editar Tópico';
+            openModal('modal-topic');
+        }
+
         // ==================== CRUD (SUPABASE) ====================
         async function handleTransactionSubmit(e) {
             e.preventDefault();
+            const editId = document.getElementById('tx-edit-id').value;
             const type = document.querySelector('input[name="tx-type"]:checked').value;
             const category = document.getElementById('tx-category').value;
             const amount = parseFloat(document.getElementById('tx-amount').value);
@@ -1160,32 +1416,32 @@
 
             const btn = document.getElementById('tx-submit-btn');
             btn.disabled = true;
-            btn.innerText = 'Salvando...';
+            btn.innerText = editId ? 'Atualizando...' : 'Salvando...';
 
             try {
-                const { error } = await sb.from('transactions').insert({
-                    user_id: currentUser.id,
-                    type,
-                    category,
-                    amount,
-                    date,
-                    description: desc
-                });
+                let error;
+                if (editId) {
+                    ({ error } = await sb.from('transactions').update({ type, category, amount, date, description: desc }).eq('id', editId));
+                } else {
+                    ({ error } = await sb.from('transactions').insert({ user_id: currentUser.id, type, category, amount, date, description: desc }));
+                }
                 if (error) throw error;
 
                 closeModal('modal-transaction');
-                document.getElementById('form-transaction').reset();
                 await loadData();
+                showToast(editId ? 'Lançamento atualizado!' : 'Lançamento salvo!', 'success');
             } catch (err) {
-                alert('Erro ao salvar lançamento: ' + err.message);
+                showToast('Erro ao salvar lançamento: ' + err.message, 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerText = 'Salvar Lançamento';
+                const stillEditing = document.getElementById('tx-edit-id').value;
+                btn.innerText = stillEditing ? 'Atualizar Lançamento' : 'Salvar Lançamento';
             }
         }
 
         async function handleTopicSubmit(e) {
             e.preventDefault();
+            const editId = document.getElementById('topic-edit-id').value;
             const name = document.getElementById('topic-name').value;
             const percent = parseFloat(document.getElementById('topic-percent').value);
             const icon = document.getElementById('topic-icon').value;
@@ -1196,46 +1452,52 @@
 
             const btn = document.getElementById('topic-submit-btn');
             btn.disabled = true;
-            btn.innerText = 'Salvando...';
+            btn.innerText = editId ? 'Atualizando...' : 'Salvando...';
 
             try {
-                const { error } = await sb.from('topics').insert({
-                    user_id: currentUser.id,
-                    name,
-                    percent,
-                    icon,
-                    color
-                });
+                let error;
+                if (editId) {
+                    ({ error } = await sb.from('topics').update({ name, percent, icon, color }).eq('id', editId));
+                } else {
+                    ({ error } = await sb.from('topics').insert({ user_id: currentUser.id, name, percent, icon, color }));
+                }
                 if (error) throw error;
 
                 closeModal('modal-topic');
-                document.getElementById('form-topic').reset();
                 await loadData();
+                showToast(editId ? 'Tópico atualizado!' : 'Tópico salvo!', 'success');
             } catch (err) {
-                alert('Erro ao salvar tópico: ' + err.message);
+                showToast('Erro ao salvar tópico: ' + err.message, 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerText = 'Salvar Tópico';
+                const stillEditing = document.getElementById('topic-edit-id').value;
+                btn.innerText = stillEditing ? 'Atualizar Tópico' : 'Salvar Tópico';
             }
         }
 
         async function deleteTransaction(id) {
+            const ok = await confirmAction('Esse lançamento será excluído permanentemente.', 'Excluir lançamento?');
+            if (!ok) return;
             try {
                 const { error } = await sb.from('transactions').delete().eq('id', id);
                 if (error) throw error;
                 await loadData();
+                showToast('Lançamento excluído.', 'success');
             } catch (err) {
-                alert('Erro ao excluir lançamento: ' + err.message);
+                showToast('Erro ao excluir lançamento: ' + err.message, 'error');
             }
         }
 
         async function deleteTopic(id) {
+            const ok = await confirmAction('Esse tópico de alocação será excluído permanentemente.', 'Excluir tópico?');
+            if (!ok) return;
             try {
                 const { error } = await sb.from('topics').delete().eq('id', id);
                 if (error) throw error;
                 await loadData();
+                showToast('Tópico excluído.', 'success');
             } catch (err) {
-                alert('Erro ao excluir tópico: ' + err.message);
+                showToast('Erro ao excluir tópico: ' + err.message, 'error');
             }
         }
 
