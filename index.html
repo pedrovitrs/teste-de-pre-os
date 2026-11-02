@@ -1,1814 +1,208 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BusFleet Pro - Gestão Financeira de Ônibus</title>
-    <meta name="description" content="BusFleet Pro — gestão financeira completa para motoristas de ônibus, fretamento e transporte de passageiros.">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9A%8C%3C/text%3E%3C/svg%3E">
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Supabase JS Client -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f7ff',
-                            100: '#e0effe',
-                            500: '#0284c7',
-                            600: '#0369a1',
-                            700: '#075985',
-                            900: '#0c4a6e',
-                        },
-                        bus: {
-                            accent: '#f59e0b',
-                            dark: '#0f172a',
-                            card: '#1e293b'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #090d16;
-            color: #f1f5f9;
-        }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
-        }
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .glass-panel-hover:hover {
-            border-color: rgba(2, 132, 199, 0.4);
-            box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.1);
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .animate-spin { animation: spin 0.8s linear infinite; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Azhar Perfumaria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ====== CORES: troque aqui para casar com a identidade da loja ====== */
+:root{
+  --bg:#FAF5EE; --ink:#2A1420; --plum:#3B1A2E; --gold:#B8883A; --gold-soft:#E9D6AE;
+  --muted:#7B6A70; --line:#E6DAC9; --card:#FFFFFF; --ok:#1F7A4D;
+  --display:'Marcellus','Times New Roman',serif; --body:'Jost',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#1D0E17;--ink:#F5ECE0;--plum:#2A1220;--card:#2A1623;--line:#4A2C3D;--muted:#B9A5AE;--gold-soft:#5A4320}
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.5}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:14px 5vw;background:var(--plum);color:#F5ECE0}
+.logo{font-family:var(--display);font-size:1.5rem;letter-spacing:.14em}
+.cart-btn{display:flex;gap:10px;align-items:center;padding:9px 16px;border:1px solid var(--gold);border-radius:999px;color:#F5ECE0}
+.cart-btn b{background:var(--gold);color:var(--plum);border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;font-size:.8rem}
+.hero{background:var(--plum);color:#F5ECE0;padding:clamp(48px,9vw,110px) 5vw;display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(2.2rem,6vw,4.4rem);line-height:1.05;max-width:14ch}
+.hero p{margin:18px 0 26px;max-width:44ch;color:#D9C7CF}
+.btn{display:inline-block;background:var(--gold);color:var(--plum);padding:13px 26px;border-radius:999px;font-weight:600;text-decoration:none}
+.hero svg{width:100%;max-width:300px;justify-self:center}
+.bar{padding:34px 5vw 10px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.bar h2{font-family:var(--display);font-weight:400;font-size:1.9rem;margin-right:auto}
+.chip{padding:8px 16px;border:1px solid var(--line);border-radius:999px;font-size:.92rem}
+.chip[aria-pressed="true"]{background:var(--plum);color:#F5ECE0;border-color:var(--plum)}
+.grid{padding:16px 5vw 70px;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.card .pic{aspect-ratio:1;display:grid;place-items:center}
+.card .pic svg{width:46%}
+.card .info{padding:14px 16px 16px;display:flex;flex-direction:column;gap:4px;flex:1}
+.card h3{font-family:var(--display);font-weight:400;font-size:1.15rem}
+.card small{color:var(--muted)}
+.price{margin-top:auto;padding-top:8px;font-weight:600;font-size:1.1rem}
+.add{margin-top:10px;padding:10px;border-radius:10px;background:var(--plum);color:#F5ECE0;font-weight:500}
+.add:hover{background:var(--gold);color:var(--plum)}
+.ovl{position:fixed;inset:0;background:rgba(20,8,14,.55);opacity:0;pointer-events:none;transition:.25s;z-index:30}
+.ovl.on{opacity:1;pointer-events:auto}
+aside{position:fixed;top:0;right:0;height:100%;width:min(440px,100%);background:var(--bg);z-index:31;transform:translateX(100%);transition:transform .3s;display:flex;flex-direction:column;box-shadow:-10px 0 40px rgba(0,0,0,.25)}
+aside.on{transform:none}
+.ch{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line)}
+.ch h2{font-family:var(--display);font-weight:400}
+.items{flex:1;overflow:auto;padding:8px 22px}
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.row .qty{display:flex;align-items:center;gap:10px}
+.row .qty button{width:28px;height:28px;border:1px solid var(--line);border-radius:50%}
+.row .rm{color:var(--muted);font-size:.85rem;text-decoration:underline}
+.empty{padding:40px 0;text-align:center;color:var(--muted)}
+.foot{padding:16px 22px 22px;border-top:1px solid var(--line);display:grid;gap:10px}
+.foot input,.foot select,.foot textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
+.total{display:flex;justify-content:space-between;font-size:1.2rem;font-weight:600}
+.send{background:var(--ok);color:#fff;padding:14px;border-radius:12px;font-weight:600;font-size:1rem}
+.send:disabled{opacity:.4;cursor:not-allowed}
+.err{color:#B3261E;font-size:.85rem;min-height:1em}
+footer{padding:30px 5vw;text-align:center;color:var(--muted);border-top:1px solid var(--line);font-size:.9rem}
+@media(max-width:720px){.hero{grid-template-columns:1fr}.hero svg{max-width:180px;order:-1}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
 </head>
-<body class="min-h-screen antialiased selection:bg-brand-500 selection:text-white">
+<body>
+<header class="top">
+  <div class="logo" id="storeName">AZHAR</div>
+  <button class="cart-btn" id="openCart" aria-label="Abrir carrinho">Carrinho <b id="count">0</b></button>
+</header>
 
-    <!-- TOASTS -->
-    <div id="toast-container" class="fixed top-4 right-4 z-[200] flex flex-col gap-2 w-[90vw] max-w-xs"></div>
+<section class="hero">
+  <div>
+    <h1>Perfumes que ficam na memória</h1>
+    <p>Escolha suas fragrâncias, monte o carrinho e finalize o pedido direto pelo WhatsApp.</p>
+    <a class="btn" href="#catalogo">Ver perfumes</a>
+  </div>
+  <svg viewBox="0 0 120 170" aria-hidden="true"><rect x="46" y="6" width="28" height="22" rx="4" fill="#B8883A"/><rect x="52" y="28" width="16" height="10" fill="#E9D6AE"/><rect x="14" y="38" width="92" height="124" rx="16" fill="none" stroke="#B8883A" stroke-width="3"/><rect x="24" y="96" width="72" height="56" rx="8" fill="#B8883A" opacity=".35"/><circle cx="60" cy="72" r="13" fill="none" stroke="#E9D6AE" stroke-width="2"/></svg>
+</section>
 
-    <!-- MODAL DE CONFIRMAÇÃO -->
-    <div id="modal-confirm" class="fixed inset-0 z-[150] hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-        <div class="glass-panel bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-6 space-y-4 shadow-2xl">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center border border-rose-500/20 flex-shrink-0">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <div>
-                    <h3 class="font-bold text-white text-sm" id="confirm-title">Confirmar ação</h3>
-                    <p class="text-xs text-slate-400" id="confirm-message">Tem certeza?</p>
-                </div>
-            </div>
-            <div class="flex gap-3 pt-2">
-                <button onclick="resolveConfirm(false)" class="w-1/2 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition">Cancelar</button>
-                <button onclick="resolveConfirm(true)" class="w-1/2 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition">Excluir</button>
-            </div>
-        </div>
+<div class="bar" id="catalogo">
+  <h2>Catálogo</h2>
+  <div id="chips" role="group" aria-label="Filtrar por categoria" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+</div>
+<main class="grid" id="grid"></main>
+<footer id="foot">Pedidos finalizados pelo WhatsApp</footer>
+
+<div class="ovl" id="ovl"></div>
+<aside id="drawer" aria-label="Carrinho" aria-hidden="true">
+  <div class="ch"><h2>Seu carrinho</h2><button id="closeCart" aria-label="Fechar">✕</button></div>
+  <div class="items" id="items"></div>
+  <div class="foot">
+    <div class="total"><span>Total</span><span id="total">R$ 0,00</span></div>
+    <input id="nome" placeholder="Seu nome" autocomplete="name">
+    <select id="entrega"><option>Retirar na loja</option><option>Entrega</option></select>
+    <div id="end" hidden style="display:none;gap:10px">
+      <input id="rua" placeholder="Rua e número" autocomplete="street-address">
+      <input id="bairro" placeholder="Bairro">
+      <input id="cidade" placeholder="Cidade" value="Barra do Mendes">
+      <input id="ref" placeholder="Ponto de referência (opcional)">
     </div>
-
-    <!-- OVERLAY DE CARREGAMENTO -->
-    <div id="loading-overlay" class="fixed inset-0 z-[90] hidden items-center justify-center bg-[#090d16]/90 backdrop-blur-sm">
-        <div class="flex flex-col items-center gap-3">
-            <div class="w-10 h-10 border-4 border-slate-700 border-t-brand-500 rounded-full animate-spin"></div>
-            <p class="text-xs text-slate-400 font-semibold">Carregando seus dados...</p>
-        </div>
-    </div>
-
-    <!-- ==================== TELA DE LOGIN / CADASTRO ==================== -->
-    <div id="auth-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-[#090d16] p-4">
-        <div class="glass-panel bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-8 space-y-5 shadow-2xl">
-            <div class="text-center space-y-2">
-                <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-brand-600/30">
-                    <i class="fa-solid fa-bus"></i>
-                </div>
-                <h1 class="font-extrabold text-xl text-white">BusFleet<span class="text-amber-500">PRO</span></h1>
-                <p id="auth-subtitle" class="text-xs text-slate-400">Entre para acessar sua gestão financeira</p>
-            </div>
-
-            <div id="auth-error" class="hidden text-xs rounded-xl p-3 text-center border"></div>
-
-            <form id="form-auth" class="space-y-3" onsubmit="handleAuthSubmit(event)">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">E-mail (Gmail)</label>
-                    <input type="email" id="auth-email" placeholder="seuemail@gmail.com" required
-                        class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm outline-none focus:border-brand-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Senha</label>
-                    <div class="relative">
-                        <input type="password" id="auth-password" placeholder="••••••••" required minlength="6"
-                            class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 pr-10 text-sm outline-none focus:border-brand-500">
-                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-0 top-0 h-full px-3 text-slate-400 hover:text-white text-xs">
-                            <i class="fa-solid fa-eye" id="auth-password-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <button type="submit" id="auth-submit-btn"
-                    class="w-full py-3 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-xl text-sm font-bold transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
-                    <span>Entrar</span>
-                </button>
-                <button type="button" id="auth-forgot-btn" onclick="handleForgotPassword()" class="w-full text-[11px] text-slate-500 hover:text-slate-300 text-center transition">
-                    Esqueceu a senha?
-                </button>
-            </form>
-
-            <button id="auth-toggle" onclick="toggleAuthMode()" class="w-full text-xs text-slate-400 hover:text-white text-center transition">
-                Não tem conta? <span class="text-brand-400 font-semibold">Cadastre-se</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- ==================== APLICATIVO (só aparece autenticado) ==================== -->
-    <div id="app-root" class="hidden min-h-screen flex flex-col lg:flex-row">
-
-    <!-- Sidebar Navigation -->
-    <aside class="w-full lg:w-72 bg-slate-900 border-r border-slate-800 flex-shrink-0 flex flex-col justify-between z-20">
-        <div>
-            <!-- Brand Logo -->
-            <div class="p-6 flex items-center justify-between border-b border-slate-800/80">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-brand-600/30">
-                        <i class="fa-solid fa-bus"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">BusFleet<span class="text-amber-500">PRO</span></h1>
-                        <p class="text-[11px] text-slate-400 font-medium">Gestão Financeira Frota</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation Links -->
-            <nav class="p-4 space-y-1.5">
-                <a href="#dashboard" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200 bg-brand-600/20 text-brand-500 border border-brand-500/30">
-                    <i class="fa-solid fa-chart-pie w-5"></i>
-                    <span>Painel Principal</span>
-                </a>
-                <a href="#lancamentos" onclick="switchTab('lancamentos')" id="nav-lancamentos" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all duration-200">
-                    <i class="fa-solid fa-money-bill-transfer w-5"></i>
-                    <span>Lançamentos</span>
-                </a>
-                <a href="#topicos" onclick="switchTab('topicos')" id="nav-topicos" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all duration-200">
-                    <i class="fa-solid fa-pie-chart w-5"></i>
-                    <span>Tópicos & Reservas %</span>
-                </a>
-                <a href="#relatorios" onclick="switchTab('relatorios')" id="nav-relatorios" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all duration-200">
-                    <i class="fa-solid fa-file-invoice-dollar w-5"></i>
-                    <span>Resumo Temporal</span>
-                </a>
-                <a href="#passes" onclick="switchTab('passes')" id="nav-passes" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all duration-200">
-                    <i class="fa-solid fa-id-card w-5"></i>
-                    <span>Passes Mensais</span>
-                </a>
-            </nav>
-        </div>
-
-        <!-- Driver Profile Info Card -->
-        <div class="p-4 m-4 rounded-2xl bg-slate-800/50 border border-slate-700/50">
-            <div class="flex items-center gap-3">
-                <div class="relative">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Motorista" class="w-10 h-10 rounded-full object-cover ring-2 ring-brand-500">
-                    <span class="w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full absolute bottom-0 right-0"></span>
-                </div>
-                <div class="overflow-hidden flex-1">
-                    <p id="profile-email" class="text-xs font-bold text-white truncate">Carregando...</p>
-                    <p class="text-[11px] text-slate-400 truncate">Ônibus #408 - Linha 510</p>
-                </div>
-            </div>
-            <div class="mt-3 pt-3 border-t border-slate-700/60 flex justify-between items-center text-[11px] text-slate-400">
-                <span>Status Operacional</span>
-                <span class="text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">Ativo</span>
-            </div>
-            <button onclick="handleLogout()" class="mt-3 w-full text-[11px] font-bold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg py-2 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span>Sair da Conta</span>
-            </button>
-        </div>
-    </aside>
-
-    <!-- Main Content Layout -->
-    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        
-        <!-- Header -->
-        <header class="sticky top-0 z-10 glass-panel border-b border-slate-800 px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h2 id="page-title" class="text-xl font-bold text-white tracking-tight">Painel Operacional</h2>
-                <p id="page-subtitle" class="text-xs text-slate-400">Acompanhe seu faturamento bruto, gasolina e divisão de lucros por tópicos.</p>
-            </div>
-
-            <!-- Quick Action Buttons & Period Selector -->
-            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-                <!-- Period Filter Dropdown -->
-                <select id="filter-period" onchange="renderAll()" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs font-semibold rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
-                    <option value="today">Hoje</option>
-                    <option value="week">Esta Semana</option>
-                    <option value="month" selected>Este Mês</option>
-                    <option value="year">Este Ano</option>
-                    <option value="all">Todo o Histórico</option>
-                </select>
-
-                <button onclick="openModal('modal-transaction')" class="flex items-center gap-2 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-lg shadow-brand-500/20">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Novo Lançamento</span>
-                </button>
-            </div>
-        </header>
-
-        <!-- Dynamic Content Body -->
-        <div class="p-6 space-y-6">
-
-            <!-- SECTION 1: TAB DASHBOARD -->
-            <div id="tab-dashboard" class="tab-content space-y-6">
-                
-                <!-- KPI Cards Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    
-                    <!-- Faturamento Bruto -->
-                    <div class="glass-panel p-5 rounded-2xl relative overflow-hidden glass-panel-hover transition">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Faturamento Bruto</span>
-                                <h3 id="kpi-gross-revenue" class="text-2xl font-extrabold text-white mt-1">R$ 0,00</h3>
-                            </div>
-                            <div class="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
-                                <i class="fa-solid fa-hand-holding-dollar text-lg"></i>
-                            </div>
-                        </div>
-                        <div class="mt-3 flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
-                            <i class="fa-solid fa-arrow-trend-up"></i>
-                            <span>Entradas Totais de Passagens</span>
-                        </div>
-                    </div>
-
-                    <!-- Gastos (Gasolina & Outros) -->
-                    <div class="glass-panel p-5 rounded-2xl relative overflow-hidden glass-panel-hover transition">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total de Despesas</span>
-                                <h3 id="kpi-total-expenses" class="text-2xl font-extrabold text-rose-400 mt-1">R$ 0,00</h3>
-                            </div>
-                            <div class="w-11 h-11 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center">
-                                <i class="fa-solid fa-gas-pump text-lg"></i>
-                            </div>
-                        </div>
-                        <div class="mt-3 flex items-center gap-1.5 text-xs text-rose-400 font-medium">
-                            <i class="fa-solid fa-arrow-trend-down"></i>
-                            <span>Combustível, Pedágio e Outros</span>
-                        </div>
-                    </div>
-
-                    <!-- Lucro Líquido (Sobrou) -->
-                    <div class="glass-panel p-5 rounded-2xl relative overflow-hidden glass-panel-hover transition bg-gradient-to-br from-slate-800/90 to-brand-900/30 border-brand-500/30">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-xs font-semibold text-brand-300 uppercase tracking-wider">Lucro Sobrado</span>
-                                <h3 id="kpi-net-profit" class="text-2xl font-extrabold text-amber-400 mt-1">R$ 0,00</h3>
-                            </div>
-                            <div class="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center">
-                                <i class="fa-solid fa-sack-dollar text-lg"></i>
-                            </div>
-                        </div>
-                        <div class="mt-3 flex items-center gap-1.5 text-xs text-slate-300 font-medium">
-                            <span>Faturamento − Gastos</span>
-                        </div>
-                    </div>
-
-                    <!-- Margem Operacional -->
-                    <div class="glass-panel p-5 rounded-2xl relative overflow-hidden glass-panel-hover transition">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Margem Líquida</span>
-                                <h3 id="kpi-profit-margin" class="text-2xl font-extrabold text-sky-400 mt-1">0.0%</h3>
-                            </div>
-                            <div class="w-11 h-11 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center">
-                                <i class="fa-solid fa-percent text-lg"></i>
-                            </div>
-                        </div>
-                        <div class="mt-3 flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-                            <span>Eficiência do Veículo</span>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- TOPICS ALLOCATION QUICK PANEL -->
-                <div class="glass-panel p-6 rounded-2xl space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-4">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-base font-bold text-white">Alocação Automática do Lucro Líquido</h3>
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">Personalizado pelo Motorista</span>
-                            </div>
-                            <p class="text-xs text-slate-400">Divisão exata em R$ baseada nas porcentagens registradas.</p>
-                        </div>
-                        <button onclick="openModal('modal-topic')" class="text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white px-3 py-2 rounded-xl border border-slate-700 transition flex items-center gap-2">
-                            <i class="fa-solid fa-sliders text-amber-500"></i>
-                            <span>Gerenciar Tópicos %</span>
-                        </button>
-                    </div>
-
-                    <!-- Dynamic Allocation Grid -->
-                    <div id="topics-dashboard-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <!-- Populated dynamically via JS -->
-                    </div>
-
-                    <!-- Total Allocated Percent Bar -->
-                    <div class="pt-2">
-                        <div class="flex justify-between items-center text-xs text-slate-400 mb-1.5">
-                            <span id="allocation-bar-label">Total Alocado dos Lucros</span>
-                            <span id="allocation-bar-percent" class="font-bold text-white">0%</span>
-                        </div>
-                        <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-700">
-                            <div id="allocation-bar-fill" class="bg-gradient-to-r from-brand-500 via-amber-500 to-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts Grid -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <!-- Main Performance Chart -->
-                    <div class="glass-panel p-6 rounded-2xl lg:col-span-2">
-                        <div class="flex justify-between items-center mb-4">
-                            <div>
-                                <h3 class="font-bold text-white">Balanço Financeiro (Entradas x Saídas)</h3>
-                                <p class="text-xs text-slate-400">Evolução do faturamento diário e combustível</p>
-                            </div>
-                            <span class="text-xs text-slate-400 flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Entradas
-                                <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> Saídas
-                            </span>
-                        </div>
-                        <div class="h-64">
-                            <canvas id="chart-performance"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Expense Category Doughnut Chart -->
-                    <div class="glass-panel p-6 rounded-2xl">
-                        <div class="mb-4">
-                            <h3 class="font-bold text-white">Distribuição dos Tópicos</h3>
-                            <p class="text-xs text-slate-400">Onde o lucro está sendo reservado</p>
-                        </div>
-                        <div class="h-64 flex items-center justify-center">
-                            <canvas id="chart-topics"></canvas>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Recent Transactions Table -->
-                <div class="glass-panel rounded-2xl overflow-hidden">
-                    <div class="p-5 border-b border-slate-800 flex justify-between items-center">
-                        <div>
-                            <h3 class="font-bold text-white">Últimos Lançamentos</h3>
-                            <p class="text-xs text-slate-400">Entradas de passagens e gastos operacionais</p>
-                        </div>
-                        <button onclick="switchTab('lancamentos')" class="text-xs font-semibold text-brand-400 hover:text-brand-300">Ver Todos →</button>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-800/60 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-                                <tr>
-                                    <th class="p-4">Data</th>
-                                    <th class="p-4">Tipo</th>
-                                    <th class="p-4">Categoria</th>
-                                    <th class="p-4">Descrição</th>
-                                    <th class="p-4 text-right">Valor</th>
-                                    <th class="p-4 text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dashboard-recent-table" class="divide-y divide-slate-800/60 text-slate-300">
-                                <!-- Populated dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- SECTION 2: TAB LANÇAMENTOS -->
-            <div id="tab-lancamentos" class="tab-content hidden space-y-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 glass-panel p-5 rounded-2xl">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center font-bold">
-                            <i class="fa-solid fa-list-check text-lg"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-white">Gerenciador de Lançamentos</h3>
-                            <p class="text-xs text-slate-400">Histórico detalhado de tudo que entrou e saiu</p>
-                        </div>
-                    </div>
-                    <button onclick="openModal('modal-transaction')" class="bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Adicionar Novo Lançamento</span>
-                    </button>
-                </div>
-
-                <!-- Busca, Filtro e Exportação -->
-                <div class="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row gap-3">
-                    <div class="relative flex-1">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                        <input type="text" id="tx-search" oninput="renderAll()" placeholder="Buscar por categoria ou descrição..."
-                            class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl pl-9 pr-3 py-2.5 text-xs outline-none focus:border-brand-500">
-                    </div>
-                    <select id="tx-filter-type" onchange="renderAll()" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold rounded-xl px-3 py-2.5 outline-none focus:border-brand-500 cursor-pointer">
-                        <option value="all">Todos os Tipos</option>
-                        <option value="income">Somente Entradas</option>
-                        <option value="expense">Somente Saídas</option>
-                    </select>
-                    <button onclick="exportCSV()" class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition whitespace-nowrap">
-                        <i class="fa-solid fa-file-csv text-emerald-400"></i>
-                        <span>Exportar CSV</span>
-                    </button>
-                </div>
-
-                <!-- Complete Table -->
-                <div class="glass-panel rounded-2xl overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-800 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-                                <tr>
-                                    <th class="p-4">Data</th>
-                                    <th class="p-4">Tipo</th>
-                                    <th class="p-4">Categoria</th>
-                                    <th class="p-4">Descrição</th>
-                                    <th class="p-4 text-right">Valor</th>
-                                    <th class="p-4 text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="full-transactions-table" class="divide-y divide-slate-800/60 text-slate-300">
-                                <!-- Populated dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECTION 3: TAB TÓPICOS -->
-            <div id="tab-topicos" class="tab-content hidden space-y-6">
-                
-                <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-amber-500 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-white">Configurar Tópicos de Alocação de Lucro</h3>
-                        <p class="text-xs text-slate-400 max-w-2xl mt-1">
-                            Defina a porcentagem do **lucro líquido** que será destinada a cada objetivo. O sistema calcula automaticamente quanto dinheiro do lucro vai para manutenção, pneus, reserva ou investimento do motorista.
-                        </p>
-                    </div>
-                    <button onclick="openModal('modal-topic')" class="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-extrabold text-xs px-5 py-3 rounded-xl shadow-lg shadow-amber-500/20 hover:brightness-110 transition flex items-center gap-2">
-                        <i class="fa-solid fa-plus-circle"></i>
-                        <span>Criar Novo Tópico %</span>
-                    </button>
-                </div>
-
-                <!-- Topic Cards List -->
-                <div id="topics-management-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <!-- Populated dynamically -->
-                </div>
-
-            </div>
-
-            <!-- SECTION 4: TAB RELATÓRIOS -->
-            <div id="tab-relatorios" class="tab-content hidden space-y-6">
-                
-                <div class="glass-panel p-6 rounded-2xl">
-                    <h3 class="text-base font-bold text-white mb-1">Resumo Temporal Consolidado</h3>
-                    <p class="text-xs text-slate-400 mb-6">Comparativo detalhado de faturamento bruto, gastos e lucro por período.</p>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        
-                        <!-- Resumo Hoje -->
-                        <div class="bg-slate-800/70 border border-slate-700/60 p-4 rounded-xl space-y-3">
-                            <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                                <span class="font-bold text-xs text-amber-400">HOJE</span>
-                                <i class="fa-solid fa-calendar-day text-slate-400 text-xs"></i>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-[11px] text-slate-400">Faturamento Bruto:</p>
-                                <p id="report-today-gross" class="font-bold text-sm text-emerald-400">R$ 0,00</p>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-[11px] text-slate-400">Gasolina / Gastos:</p>
-                                <p id="report-today-expenses" class="font-bold text-sm text-rose-400">R$ 0,00</p>
-                            </div>
-                            <div class="pt-2 border-t border-slate-700 flex justify-between items-center">
-                                <span class="text-xs text-slate-300 font-semibold">Lucro Sobrado:</span>
-                                <span id="report-today-net" class="font-extrabold text-sm text-white">R$ 0,00</span>
-                            </div>
-                        </div>
-
-                        <!-- Resumo Esta Semana -->
-                        <div class="bg-slate-800/70 border border-slate-700/60 p-4 rounded-xl space-y-3">
-                            <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                                <span class="font-bold text-xs text-sky-400">ESTA SEMANA</span>
-                                <i class="fa-solid fa-calendar-week text-slate-400 text-xs"></i>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-[11px] text-slate-400">Faturamento Bruto:</p>
-                                <p id="report-week-gross" class="font-bold text-sm text-emerald-400">R$ 0,00</p>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-[11px] text-slate-400">Gasolina / Gastos:</p>
-                                <p id="report-week-expenses" class="font-bold text-sm text-rose-400">R$ 0,00</p>
-                            </div>
-                            <div class="pt-2 border-t border-slate-700 flex justify-between items-center">
-                                <span class="text-xs text-slate-300 font-semibold">Lucro Sobrado:</span>
-                                <span id="report-week-net" class="font-extrabold text-sm text-white">R$ 0,00</span>
-                            </div>
-                        </div>
-
-                        <!-- Resumo Este Mês -->
-                        <div class="bg-slate-800/70 border border-slate-700/60 p-4 rounded-xl space-y-3">
-                            <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                                <span class="font-bold text-xs text-brand-400">ESTE MÊS</span>
-                                <i class="fa-solid fa-calendar-days text-slate-400 text-xs"></i>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-[11px] text-slate-400">Faturamento Bruto:</p>
-                                <p id="report-month-gross" class="font-bold text-sm text-emerald-400">R$ 0,00</p>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-[11px] text-slate-400">Gasolina / Gastos:</p>
-                                <p id="report-month-expenses" class="font-bold text-sm text-rose-400">R$ 0,00</p>
-                            </div>
-                            <div class="pt-2 border-t border-slate-700 flex justify-between items-center">
-                                <span class="text-xs text-slate-300 font-semibold">Lucro Sobrado:</span>
-                                <span id="report-month-net" class="font-extrabold text-sm text-white">R$ 0,00</span>
-                            </div>
-                        </div>
-
-                        <!-- Resumo Este Ano -->
-                        <div class="bg-slate-800/70 border border-slate-700/60 p-4 rounded-xl space-y-3">
-                            <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                                <span class="font-bold text-xs text-emerald-400">ESTE ANO</span>
-                                <i class="fa-solid fa-bus text-slate-400 text-xs"></i>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-[11px] text-slate-400">Faturamento Bruto:</p>
-                                <p id="report-year-gross" class="font-bold text-sm text-emerald-400">R$ 0,00</p>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-[11px] text-slate-400">Gasolina / Gastos:</p>
-                                <p id="report-year-expenses" class="font-bold text-sm text-rose-400">R$ 0,00</p>
-                            </div>
-                            <div class="pt-2 border-t border-slate-700 flex justify-between items-center">
-                                <span class="text-xs text-slate-300 font-semibold">Lucro Sobrado:</span>
-                                <span id="report-year-net" class="font-extrabold text-sm text-white">R$ 0,00</span>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- SECTION 5: TAB PASSES MENSAIS -->
-            <div id="tab-passes" class="tab-content hidden space-y-6">
-
-                <div class="glass-panel p-6 rounded-2xl border-l-4 border-l-brand-500 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-white">Passes Mensais dos Passageiros</h3>
-                        <p class="text-xs text-slate-400 max-w-2xl mt-1">
-                            Cadastre o nome de cada passageiro e o dia do mês em que o passe vence. O status é calculado automaticamente: <strong class="text-emerald-400">verde</strong> enquanto está em dia e <strong class="text-rose-400">vermelho</strong> assim que passar do dia de vencimento — todo mês o ciclo reinicia sozinho.
-                        </p>
-                    </div>
-                    <button onclick="openModal('modal-pass')" class="bg-gradient-to-r from-brand-500 to-brand-600 text-white font-extrabold text-xs px-5 py-3 rounded-xl shadow-lg shadow-brand-500/20 hover:brightness-110 transition flex items-center gap-2 whitespace-nowrap">
-                        <i class="fa-solid fa-user-plus"></i>
-                        <span>Novo Passe</span>
-                    </button>
-                </div>
-
-                <!-- Resumo rápido de status -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    <div class="glass-panel p-4 rounded-2xl flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-400 border border-brand-500/20 flex items-center justify-center">
-                            <i class="fa-solid fa-users"></i>
-                        </div>
-                        <div>
-                            <p class="text-[10px] text-slate-400 uppercase font-semibold">Total de Passes</p>
-                            <p id="passes-count-total" class="text-lg font-extrabold text-white">0</p>
-                        </div>
-                    </div>
-                    <div class="glass-panel p-4 rounded-2xl flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
-                            <i class="fa-solid fa-circle-check"></i>
-                        </div>
-                        <div>
-                            <p class="text-[10px] text-slate-400 uppercase font-semibold">Em Dia</p>
-                            <p id="passes-count-active" class="text-lg font-extrabold text-emerald-400">0</p>
-                        </div>
-                    </div>
-                    <div class="glass-panel p-4 rounded-2xl flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                        </div>
-                        <div>
-                            <p class="text-[10px] text-slate-400 uppercase font-semibold">Vencidos</p>
-                            <p id="passes-count-overdue" class="text-lg font-extrabold text-rose-400">0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Grid de Passes -->
-                <div id="passes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <!-- Populated dynamically -->
-                </div>
-
-            </div>
-
-        </div>
-    </main>
-
-    <!-- MODAL 1: NOVO LANÇAMENTO (ENTRADA / SAÍDA) -->
-    <div id="modal-transaction" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
-        <div class="glass-panel bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4 shadow-2xl relative">
-            
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-brand-500"></i>
-                    <span>Lançar Entrada ou Saída</span>
-                </h3>
-                <button onclick="closeModal('modal-transaction')" class="text-slate-400 hover:text-white text-sm">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form id="form-transaction" onsubmit="handleTransactionSubmit(event)" class="space-y-4">
-                <input type="hidden" id="tx-edit-id" value="">
-
-                <!-- Tipo de Transação -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Tipo de Operação</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="cursor-pointer">
-                            <input type="radio" name="tx-type" value="income" class="peer hidden" checked onchange="toggleCategoryOptions()">
-                            <div class="p-3 rounded-xl border border-slate-700 bg-slate-800/50 text-center text-xs font-bold text-slate-400 peer-checked:bg-emerald-500/20 peer-checked:border-emerald-500 peer-checked:text-emerald-400 transition">
-                                <i class="fa-solid fa-circle-arrow-up mr-1"></i> Entrada (Receita)
-                            </div>
-                        </label>
-                        <label class="cursor-pointer">
-                            <input type="radio" name="tx-type" value="expense" class="peer hidden" onchange="toggleCategoryOptions()">
-                            <div class="p-3 rounded-xl border border-slate-700 bg-slate-800/50 text-center text-xs font-bold text-slate-400 peer-checked:bg-rose-500/20 peer-checked:border-rose-500 peer-checked:text-rose-400 transition">
-                                <i class="fa-solid fa-circle-arrow-down mr-1"></i> Saída (Gasto)
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Categoria -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Categoria</label>
-                    <select id="tx-category" required class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-xs outline-none focus:border-brand-500">
-                        <!-- Populated by JS -->
-                    </select>
-                </div>
-
-                <!-- Valor R$ -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Valor (R$)</label>
-                    <input type="number" id="tx-amount" step="0.01" min="0.01" placeholder="0.00" required class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm font-bold outline-none focus:border-brand-500">
-                </div>
-
-                <!-- Data -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Data</label>
-                    <input type="date" id="tx-date" required class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-xs outline-none focus:border-brand-500">
-                </div>
-
-                <!-- Descrição -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Descrição / Observação</label>
-                    <input type="text" id="tx-desc" placeholder="Ex: Abastecimento Posto Shell / Passagens da Manhã" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-xs outline-none focus:border-brand-500">
-                </div>
-
-                <!-- Submit Button -->
-                <div class="pt-2 flex gap-3">
-                    <button type="button" onclick="closeModal('modal-transaction')" class="w-1/2 py-3 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition">Cancelar</button>
-                    <button type="submit" id="tx-submit-btn" class="w-1/2 py-3 bg-brand-500 text-white rounded-xl text-xs font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/20">Salvar Lançamento</button>
-                </div>
-
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL 2: GERENCIAR/CRIAR TÓPICO DE PORCENTAGEM -->
-    <div id="modal-topic" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
-        <div class="glass-panel bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4 shadow-2xl relative">
-            
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-pie-chart text-amber-500"></i>
-                    <span>Novo Tópico de Porcentagem</span>
-                </h3>
-                <button onclick="closeModal('modal-topic')" class="text-slate-400 hover:text-white text-sm">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form id="form-topic" onsubmit="handleTopicSubmit(event)" class="space-y-4">
-                <input type="hidden" id="topic-edit-id" value="">
-
-                <!-- Nome do Tópico -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Nome do Tópico</label>
-                    <input type="text" id="topic-name" placeholder="Ex: Manutenção, Rodas Novas, IPVA, Lucro Próprio" required class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-xs outline-none focus:border-amber-500">
-                </div>
-
-                <!-- Porcentagem (%) -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Porcentagem do Lucro Líquido (%)</label>
-                    <div class="relative">
-                        <input type="number" id="topic-percent" min="1" max="100" step="0.5" placeholder="Ex: 5, 10, 15" required class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 pr-10 text-sm font-bold outline-none focus:border-amber-500">
-                        <span class="absolute right-3 top-3 text-slate-400 font-bold text-xs">%</span>
-                    </div>
-                    <p class="text-[10px] text-slate-400 mt-1">Ex: Se colocar 5%, R$ 5,00 a cada R$ 100,00 de lucro irão para este tópico.</p>
-                </div>
-
-                <!-- Ícone Representativo -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Ícone</label>
-                    <select id="topic-icon" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-xs outline-none focus:border-amber-500">
-                        <option value="fa-wrench">🔧 Manutenção Geral</option>
-                        <option value="fa-circle-dot">🛞 Rodas / Pneus Novas</option>
-                        <option value="fa-oil-can">🛢️ Óleo / Revisão</option>
-                        <option value="fa-piggy-bank">🐖 Reserva de Emergência</option>
-                        <option value="fa-id-card">📄 Licenciamento / IPVA</option>
-                        <option value="fa-user-gear">👤 Pro-labore / Salário Motorista</option>
-                    </select>
-                </div>
-
-                <!-- Cor do Badge -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Cor de Destaque</label>
-                    <select id="topic-color" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-xs outline-none focus:border-amber-500">
-                        <option value="amber">Amarelo / Dourado</option>
-                        <option value="brand">Azul Frota</option>
-                        <option value="emerald">Verde Esmeralda</option>
-                        <option value="purple">Roxo / Místico</option>
-                        <option value="rose">Rosa / Vermelho</option>
-                    </select>
-                </div>
-
-                <!-- Submit Button -->
-                <div class="pt-2 flex gap-3">
-                    <button type="button" onclick="closeModal('modal-topic')" class="w-1/2 py-3 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition">Cancelar</button>
-                    <button type="submit" id="topic-submit-btn" class="w-1/2 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 rounded-xl text-xs font-extrabold hover:brightness-110 transition shadow-lg shadow-amber-500/20">Salvar Tópico</button>
-                </div>
-
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL 3: NOVO/EDITAR PASSE MENSAL -->
-    <div id="modal-pass" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
-        <div class="glass-panel bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4 shadow-2xl relative">
-
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-id-card text-brand-500"></i>
-                    <span>Novo Passe Mensal</span>
-                </h3>
-                <button onclick="closeModal('modal-pass')" class="text-slate-400 hover:text-white text-sm">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <form id="form-pass" onsubmit="handlePassSubmit(event)" class="space-y-4">
-                <input type="hidden" id="pass-edit-id" value="">
-
-                <!-- Nome do Passageiro -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Nome do Passageiro</label>
-                    <input type="text" id="pass-name" placeholder="Ex: Maria da Silva" required class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-xs outline-none focus:border-brand-500">
-                </div>
-
-                <!-- Dia de Vencimento -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Dia do Mês em que Vence</label>
-                    <input type="number" id="pass-due-day" min="1" max="31" step="1" placeholder="Ex: 5, 10, 20" required class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-sm font-bold outline-none focus:border-brand-500">
-                    <p class="text-[10px] text-slate-400 mt-1">O passe fica vermelho automaticamente assim que esse dia passar, todo mês.</p>
-                </div>
-
-                <!-- Observação -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Observação (opcional)</label>
-                    <input type="text" id="pass-note" placeholder="Ex: Linha 510, telefone, ponto de embarque..." class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl p-3 text-xs outline-none focus:border-brand-500">
-                </div>
-
-                <!-- Submit Button -->
-                <div class="pt-2 flex gap-3">
-                    <button type="button" onclick="closeModal('modal-pass')" class="w-1/2 py-3 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-700 transition">Cancelar</button>
-                    <button type="submit" id="pass-submit-btn" class="w-1/2 py-3 bg-brand-500 text-white rounded-xl text-xs font-bold hover:bg-brand-600 transition shadow-lg shadow-brand-500/20">Salvar Passe</button>
-                </div>
-
-            </form>
-        </div>
-    </div>
-
-    </div> <!-- fim #app-root -->
-
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        // ==================== CONFIGURAÇÃO DO SUPABASE ====================
-        const SUPABASE_URL = 'https://cfahgbjvkbzprddnceeb.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmYWhnYmp2a2J6cHJkZG5jZWViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzNjU4MjgsImV4cCI6MjEwMDk0MTgyOH0.oR8axkXq8OWrgFrsgQ7aYIjaFAJsKOeuon5EyPAOCAU';
-
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // ==================== ESTADO ====================
-        let transactions = [];
-        let topics = [];
-        let passes = [];
-        let currentUser = null;
-        let isSignUpMode = false;
-        let confirmResolver = null;
-
-        let chartPerformance = null;
-        let chartTopics = null;
-
-        // ==================== TOASTS ====================
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const colors = {
-                success: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', icon: 'fa-circle-check' },
-                error: { bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-400', icon: 'fa-circle-exclamation' },
-                info: { bg: 'bg-brand-500/10', border: 'border-brand-500/30', text: 'text-brand-400', icon: 'fa-circle-info' }
-            };
-            const c = colors[type] || colors.info;
-            const toast = document.createElement('div');
-            toast.className = `glass-panel ${c.bg} ${c.border} ${c.text} border rounded-xl px-4 py-3 text-xs font-semibold flex items-center gap-2 shadow-lg`;
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(-8px)';
-            toast.innerHTML = `<i class="fa-solid ${c.icon}"></i><span class="flex-1">${message}</span>`;
-            container.appendChild(toast);
-            requestAnimationFrame(() => {
-                toast.style.transition = 'opacity 0.25s, transform 0.25s';
-                toast.style.opacity = '1';
-                toast.style.transform = 'translateY(0)';
-            });
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(-8px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3800);
-        }
-
-        // ==================== MODAL DE CONFIRMAÇÃO ====================
-        function confirmAction(message, title = 'Confirmar exclusão') {
-            document.getElementById('confirm-title').innerText = title;
-            document.getElementById('confirm-message').innerText = message;
-            document.getElementById('modal-confirm').classList.remove('hidden');
-            document.getElementById('modal-confirm').classList.add('flex');
-            return new Promise(resolve => { confirmResolver = resolve; });
-        }
-
-        function resolveConfirm(result) {
-            document.getElementById('modal-confirm').classList.add('hidden');
-            document.getElementById('modal-confirm').classList.remove('flex');
-            if (confirmResolver) { confirmResolver(result); confirmResolver = null; }
-        }
-
-        // ==================== LOADING OVERLAY ====================
-        function showLoading() {
-            document.getElementById('loading-overlay').classList.remove('hidden');
-            document.getElementById('loading-overlay').classList.add('flex');
-        }
-        function hideLoading() {
-            document.getElementById('loading-overlay').classList.add('hidden');
-            document.getElementById('loading-overlay').classList.remove('flex');
-        }
-
-        // ==================== AUTENTICAÇÃO ====================
-        function togglePasswordVisibility() {
-            const input = document.getElementById('auth-password');
-            const eye = document.getElementById('auth-password-eye');
-            if (input.type === 'password') {
-                input.type = 'text';
-                eye.classList.remove('fa-eye');
-                eye.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                eye.classList.remove('fa-eye-slash');
-                eye.classList.add('fa-eye');
-            }
-        }
-
-        function toggleAuthMode() {
-            isSignUpMode = !isSignUpMode;
-            document.getElementById('auth-submit-btn').querySelector('span').innerText = isSignUpMode ? 'Cadastrar' : 'Entrar';
-            document.getElementById('auth-toggle').innerHTML = isSignUpMode
-                ? 'Já tem conta? <span class="text-brand-400 font-semibold">Entrar</span>'
-                : 'Não tem conta? <span class="text-brand-400 font-semibold">Cadastre-se</span>';
-            document.getElementById('auth-subtitle').innerText = isSignUpMode
-                ? 'Crie sua conta para começar'
-                : 'Entre para acessar sua gestão financeira';
-            document.getElementById('auth-forgot-btn').classList.toggle('hidden', isSignUpMode);
-            hideAuthMessage();
-        }
-
-        function showAuthMessage(message, type = 'error') {
-            const box = document.getElementById('auth-error');
-            box.innerText = message;
-            box.classList.remove('hidden', 'text-rose-400', 'bg-rose-500/10', 'border-rose-500/30', 'text-emerald-400', 'bg-emerald-500/10', 'border-emerald-500/30');
-            if (type === 'error') {
-                box.classList.add('text-rose-400', 'bg-rose-500/10', 'border-rose-500/30');
-            } else {
-                box.classList.add('text-emerald-400', 'bg-emerald-500/10', 'border-emerald-500/30');
-            }
-        }
-
-        function hideAuthMessage() {
-            document.getElementById('auth-error').classList.add('hidden');
-        }
-
-        async function handleAuthSubmit(e) {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value;
-            const btn = document.getElementById('auth-submit-btn');
-            const btnLabel = btn.querySelector('span');
-
-            hideAuthMessage();
-            btn.disabled = true;
-            btnLabel.innerText = 'Aguarde...';
-
-            try {
-                let result;
-                if (isSignUpMode) {
-                    result = await sb.auth.signUp({ email, password });
-                } else {
-                    result = await sb.auth.signInWithPassword({ email, password });
-                }
-
-                if (result.error) throw result.error;
-
-                if (isSignUpMode && result.data && !result.data.session) {
-                    showAuthMessage('Cadastro realizado! Verifique seu e-mail para confirmar antes de entrar.', 'success');
-                }
-                // Se houver sessão, o listener onAuthStateChange cuida de mostrar o app.
-            } catch (err) {
-                showAuthMessage(err.message || 'Erro ao autenticar. Tente novamente.');
-            } finally {
-                btn.disabled = false;
-                btnLabel.innerText = isSignUpMode ? 'Cadastrar' : 'Entrar';
-            }
-        }
-
-        async function handleForgotPassword() {
-            const email = document.getElementById('auth-email').value.trim();
-            if (!email) {
-                showAuthMessage('Digite seu e-mail no campo acima para recuperar a senha.');
-                return;
-            }
-            try {
-                const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
-                if (error) throw error;
-                showAuthMessage('Enviamos um link de redefinição de senha para o seu e-mail.', 'success');
-            } catch (err) {
-                showAuthMessage(err.message || 'Erro ao solicitar redefinição de senha.');
-            }
-        }
-
-        async function handleLogout() {
-            await sb.auth.signOut();
-        }
-
-        sb.auth.onAuthStateChange((event, session) => {
-            if (session && session.user) {
-                currentUser = session.user;
-                document.getElementById('auth-screen').classList.add('hidden');
-                document.getElementById('app-root').classList.remove('hidden');
-                document.getElementById('app-root').classList.add('flex');
-                const profileEmail = document.getElementById('profile-email');
-                if (profileEmail) profileEmail.innerText = currentUser.email;
-                loadData();
-            } else {
-                currentUser = null;
-                transactions = [];
-                topics = [];
-                passes = [];
-                document.getElementById('auth-screen').classList.remove('hidden');
-                document.getElementById('app-root').classList.add('hidden');
-                document.getElementById('app-root').classList.remove('flex');
-                document.getElementById('form-auth').reset();
-            }
-        });
-
-        // ==================== CARREGAR DADOS NO SUPABASE ====================
-        async function loadData() {
-            showLoading();
-            try {
-                const [{ data: txData, error: txErr }, { data: topicData, error: topicErr }, { data: passData, error: passErr }] = await Promise.all([
-                    sb.from('transactions').select('*').order('date', { ascending: false }),
-                    sb.from('topics').select('*').order('created_at', { ascending: true }),
-                    sb.from('passes').select('*').order('name', { ascending: true })
-                ]);
-
-                if (txErr) throw txErr;
-                if (topicErr) throw topicErr;
-                if (passErr) throw passErr;
-
-                transactions = (txData || []).map(t => ({
-                    id: t.id,
-                    type: t.type,
-                    category: t.category,
-                    amount: Number(t.amount),
-                    date: t.date,
-                    desc: t.description || ''
-                }));
-
-                topics = (topicData || []).map(t => ({
-                    id: t.id,
-                    name: t.name,
-                    percent: Number(t.percent),
-                    icon: t.icon,
-                    color: t.color
-                }));
-
-                passes = (passData || []).map(p => ({
-                    id: p.id,
-                    name: p.name,
-                    dueDay: Number(p.due_day),
-                    note: p.note || '',
-                    lastPaidMonth: p.last_paid_month || null
-                }));
-
-                renderAll();
-            } catch (err) {
-                console.error('Erro ao carregar dados do Supabase:', err);
-                showToast('Não foi possível carregar os dados. Verifique se as tabelas existem no Supabase.', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function getFormattedDate(offsetDays = 0) {
-            const d = new Date();
-            d.setDate(d.getDate() + offsetDays);
-            return d.toISOString().split('T')[0];
-        }
-
-        function formatBRL(val) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(el => {
-                el.classList.remove('bg-brand-600/20', 'text-brand-500', 'border', 'border-brand-500/30');
-                el.classList.add('text-slate-400');
-            });
-
-            const activeTab = document.getElementById(`tab-${tabId}`);
-            if (activeTab) activeTab.classList.remove('hidden');
-
-            const activeNav = document.getElementById(`nav-${tabId}`);
-            if (activeNav) {
-                activeNav.classList.add('bg-brand-600/20', 'text-brand-500', 'border', 'border-brand-500/30');
-                activeNav.classList.remove('text-slate-400');
-            }
-
-            // Titles Update
-            const pageTitle = document.getElementById('page-title');
-            const pageSub = document.getElementById('page-subtitle');
-            
-            if (tabId === 'dashboard') {
-                pageTitle.innerText = "Painel Operacional";
-                pageSub.innerText = "Acompanhe seu faturamento bruto, gasolina e divisão de lucros por tópicos.";
-            } else if (tabId === 'lancamentos') {
-                pageTitle.innerText = "Gerenciador de Lançamentos";
-                pageSub.innerText = "Cadastre e edite todas as entradas e saídas do ônibus.";
-            } else if (tabId === 'topicos') {
-                pageTitle.innerText = "Tópicos de Porcentagem (%) do Lucro";
-                pageSub.innerText = "Crie tópicos como 5% para manutenção ou 10% para rodas novas.";
-            } else if (tabId === 'relatorios') {
-                pageTitle.innerText = "Resumo Temporal das Finanças";
-                pageSub.innerText = "Visão comparativa de hoje, semana, mês e ano do faturamento do veículo.";
-            } else if (tabId === 'passes') {
-                pageTitle.innerText = "Passes Mensais dos Passageiros";
-                pageSub.innerText = "Controle quem está em dia e quem está com o passe vencido.";
-            }
-        }
-
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-            if (id === 'modal-transaction') {
-                const editId = document.getElementById('tx-edit-id').value;
-                if (!editId) {
-                    document.getElementById('tx-date').value = getFormattedDate(0);
-                    toggleCategoryOptions();
-                }
-            }
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-            if (id === 'modal-transaction') {
-                document.getElementById('tx-edit-id').value = '';
-                document.getElementById('tx-submit-btn').innerText = 'Salvar Lançamento';
-                document.querySelector('#modal-transaction h3 span').innerText = 'Lançar Entrada ou Saída';
-                document.getElementById('form-transaction').reset();
-            }
-            if (id === 'modal-topic') {
-                document.getElementById('topic-edit-id').value = '';
-                document.getElementById('topic-submit-btn').innerText = 'Salvar Tópico';
-                document.querySelector('#modal-topic h3 span').innerText = 'Novo Tópico de Porcentagem';
-                document.getElementById('form-topic').reset();
-            }
-            if (id === 'modal-pass') {
-                document.getElementById('pass-edit-id').value = '';
-                document.getElementById('pass-submit-btn').innerText = 'Salvar Passe';
-                document.querySelector('#modal-pass h3 span').innerText = 'Novo Passe Mensal';
-                document.getElementById('form-pass').reset();
-            }
-        }
-
-        function toggleCategoryOptions() {
-            const type = document.querySelector('input[name="tx-type"]:checked').value;
-            const catSelect = document.getElementById('tx-category');
-            catSelect.innerHTML = '';
-
-            const incomeCategories = ['Passagens Urbano', 'Passagens Avulsas', 'Fretamento Fechado', 'Encomendas / Cargas', 'Outras Receitas'];
-            const expenseCategories = ['Gasolina / Diesel', 'Manutenção / Peças', 'Lava-Jato / Limpeza', 'Pedágio', 'Alimentação Motorista', 'Outros Gastos'];
-
-            const list = type === 'income' ? incomeCategories : expenseCategories;
-            list.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c;
-                opt.innerText = c;
-                catSelect.appendChild(opt);
-            });
-        }
-
-        function filterTransactionsByPeriod(period, txList = transactions) {
-            const now = new Date();
-            const todayStr = getFormattedDate(0);
-
-            return txList.filter(t => {
-                const tDate = new Date(t.date + 'T00:00:00');
-                if (period === 'today') {
-                    return t.date === todayStr;
-                } else if (period === 'week') {
-                    const diffTime = Math.abs(now - tDate);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    return diffDays <= 7;
-                } else if (period === 'month') {
-                    return tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
-                } else if (period === 'year') {
-                    return tDate.getFullYear() === now.getFullYear();
-                }
-                return true; // 'all'
-            });
-        }
-
-        function applyLancamentosFilters(list) {
-            const searchEl = document.getElementById('tx-search');
-            const typeEl = document.getElementById('tx-filter-type');
-            if (!searchEl || !typeEl) return list;
-            const search = searchEl.value.trim().toLowerCase();
-            const typeFilter = typeEl.value;
-            return list.filter(t => {
-                const matchesSearch = !search || t.category.toLowerCase().includes(search) || (t.desc || '').toLowerCase().includes(search);
-                const matchesType = typeFilter === 'all' || t.type === typeFilter;
-                return matchesSearch && matchesType;
-            });
-        }
-
-        function renderAll() {
-            const currentPeriod = document.getElementById('filter-period').value;
-            const filtered = filterTransactionsByPeriod(currentPeriod);
-
-            // Calculate Metrics
-            const grossRevenue = filtered.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
-            const totalExpenses = filtered.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
-            const netProfit = grossRevenue - totalExpenses;
-            const margin = grossRevenue > 0 ? ((netProfit / grossRevenue) * 100).toFixed(1) : '0.0';
-
-            // Update Dashboard KPIs
-            document.getElementById('kpi-gross-revenue').innerText = formatBRL(grossRevenue);
-            document.getElementById('kpi-total-expenses').innerText = formatBRL(totalExpenses);
-            document.getElementById('kpi-net-profit').innerText = formatBRL(netProfit);
-            document.getElementById('kpi-profit-margin').innerText = `${margin}%`;
-
-            renderTopicsDashboard(netProfit);
-            renderTables(filtered);
-            renderTemporalReports();
-            renderCharts(filtered);
-            renderPasses();
-        }
-
-        function renderTopicsDashboard(netProfit) {
-            const grid = document.getElementById('topics-dashboard-grid');
-            const mgtGrid = document.getElementById('topics-management-grid');
-            grid.innerHTML = '';
-            mgtGrid.innerHTML = '';
-
-            if (topics.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-6 text-slate-500 text-xs"><i class="fa-solid fa-inbox text-lg mb-2 block"></i>Nenhum tópico criado ainda.</div>`;
-                mgtGrid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 text-xs"><i class="fa-solid fa-pie-chart text-2xl mb-3 block"></i>Crie seu primeiro tópico de alocação de lucro.</div>`;
-            }
-
-            let totalPercent = 0;
-            const profitToAllocate = Math.max(0, netProfit);
-
-            topics.forEach(t => {
-                totalPercent += t.percent;
-                const allocatedAmount = (profitToAllocate * t.percent) / 100;
-
-                // Color Map
-                const colorMap = {
-                    amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-400', badge: 'bg-amber-500' },
-                    brand: { bg: 'bg-brand-500/10', border: 'border-brand-500/30', text: 'text-brand-400', badge: 'bg-brand-500' },
-                    emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', badge: 'bg-emerald-500' },
-                    purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-400', badge: 'bg-purple-500' },
-                    rose: { bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-400', badge: 'bg-rose-500' }
-                };
-                const c = colorMap[t.color] || colorMap.amber;
-
-                // Dashboard Small Card
-                const card = document.createElement('div');
-                card.className = `p-4 rounded-xl border ${c.bg} ${c.border} space-y-2 relative overflow-hidden`;
-                card.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <i class="fa-solid ${t.icon} ${c.text} text-base"></i>
-                            <span class="font-bold text-xs text-white truncate max-w-[120px]">${t.name}</span>
-                        </div>
-                        <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-slate-900/80 ${c.text} border border-slate-700">${t.percent}%</span>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-slate-400 block uppercase font-semibold">Valor Alocado</span>
-                        <span class="text-base font-extrabold text-white">${formatBRL(allocatedAmount)}</span>
-                    </div>
-                `;
-                grid.appendChild(card);
-
-                // Management Page Full Card
-                const mgtCard = document.createElement('div');
-                mgtCard.className = `glass-panel p-5 rounded-2xl border ${c.border} space-y-4 relative flex flex-col justify-between`;
-                mgtCard.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-start">
-                            <div class="w-10 h-10 rounded-xl ${c.bg} ${c.text} flex items-center justify-center text-lg font-bold border ${c.border}">
-                                <i class="fa-solid ${t.icon}"></i>
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <button onclick="editTopic('${t.id}')" class="text-slate-500 hover:text-brand-400 text-xs p-1" title="Editar">
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                                <button onclick="deleteTopic('${t.id}')" class="text-slate-500 hover:text-rose-400 text-xs p-1" title="Excluir">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-white text-sm">${t.name}</h4>
-                            <p class="text-xs text-slate-400 mt-0.5">Sempre retém <strong class="${c.text}">${t.percent}%</strong> do lucro gerado.</p>
-                        </div>
-                    </div>
-                    <div class="pt-3 border-t border-slate-800 flex justify-between items-center">
-                        <span class="text-xs text-slate-400">Acumulado do Período:</span>
-                        <span class="text-sm font-extrabold text-white">${formatBRL(allocatedAmount)}</span>
-                    </div>
-                `;
-                mgtGrid.appendChild(mgtCard);
-            });
-
-            // Allocation Bar
-            document.getElementById('allocation-bar-percent').innerText = `${totalPercent}%`;
-            document.getElementById('allocation-bar-fill').style.width = `${Math.min(100, totalPercent)}%`;
-            document.getElementById('allocation-bar-label').innerText = totalPercent > 100 
-                ? '⚠️ Porcentagem total excede 100%!' 
-                : 'Total Alocado dos Lucros Sobrados';
-        }
-
-        // ==================== PASSES MENSAIS ====================
-        function getCurrentCycleKey() {
-            const now = new Date();
-            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        }
-
-        function getPassStatus(dueDay, lastPaidMonth) {
-            const today = new Date();
-            const currentDay = today.getDate();
-            const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-            const effectiveDueDay = Math.min(dueDay, lastDayOfMonth);
-            const isPaidThisCycle = lastPaidMonth === getCurrentCycleKey();
-            const isOverdueByDate = currentDay > effectiveDueDay;
-            const overdue = isOverdueByDate && !isPaidThisCycle;
-            return {
-                overdue,
-                paid: isPaidThisCycle,
-                label: isPaidThisCycle ? 'Pago' : (overdue ? 'Vencido' : 'Em Dia'),
-                daysUntilDue: effectiveDueDay - currentDay
-            };
-        }
-
-        function renderPasses() {
-            const grid = document.getElementById('passes-grid');
-            grid.innerHTML = '';
-
-            document.getElementById('passes-count-total').innerText = passes.length;
-
-            if (passes.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-500 text-xs glass-panel rounded-2xl"><i class="fa-solid fa-id-card text-2xl mb-3 block"></i>Nenhum passe cadastrado ainda.</div>`;
-                document.getElementById('passes-count-active').innerText = '0';
-                document.getElementById('passes-count-overdue').innerText = '0';
-                return;
-            }
-
-            let activeCount = 0;
-            let overdueCount = 0;
-
-            const sorted = [...passes].sort((a, b) => a.dueDay - b.dueDay);
-
-            sorted.forEach(p => {
-                const status = getPassStatus(p.dueDay, p.lastPaidMonth);
-                if (status.overdue) overdueCount++; else activeCount++;
-
-                const statusClasses = status.overdue
-                    ? { bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-400', dot: 'bg-rose-500' }
-                    : { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', dot: 'bg-emerald-500' };
-
-                const payButton = status.paid
-                    ? `<button onclick="unmarkPassPaid('${p.id}')" class="w-full text-[11px] font-bold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg py-2 transition flex items-center justify-center gap-2">
-                         <i class="fa-solid fa-rotate-left"></i>
-                         <span>Desfazer Pagamento</span>
-                       </button>`
-                    : `<button onclick="markPassPaid('${p.id}')" class="w-full text-[11px] font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg py-2 transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
-                         <i class="fa-solid fa-check"></i>
-                         <span>Marcar como Pago</span>
-                       </button>`;
-
-                const card = document.createElement('div');
-                card.className = `glass-panel p-5 rounded-2xl border ${statusClasses.border} space-y-4 relative flex flex-col justify-between`;
-                card.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-start">
-                            <div class="w-10 h-10 rounded-xl ${statusClasses.bg} ${statusClasses.text} flex items-center justify-center text-lg font-bold border ${statusClasses.border}">
-                                <i class="fa-solid fa-user"></i>
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <button onclick="editPass('${p.id}')" class="text-slate-500 hover:text-brand-400 text-xs p-1" title="Editar">
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                                <button onclick="deletePass('${p.id}')" class="text-slate-500 hover:text-rose-400 text-xs p-1" title="Excluir">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-white text-sm truncate">${p.name}</h4>
-                            <p class="text-xs text-slate-400 mt-0.5">Vence todo dia <strong class="text-white">${p.dueDay}</strong> do mês</p>
-                            ${p.note ? `<p class="text-[11px] text-slate-500 mt-1 truncate">${p.note}</p>` : ''}
-                        </div>
-                    </div>
-                    <div class="pt-3 border-t border-slate-800 flex justify-between items-center">
-                        <span class="text-xs text-slate-400">Status:</span>
-                        <span class="flex items-center gap-1.5 text-xs font-extrabold ${statusClasses.text}">
-                            <span class="w-2 h-2 rounded-full ${statusClasses.dot} inline-block"></span>
-                            ${status.label}
-                        </span>
-                    </div>
-                    ${payButton}
-                `;
-                grid.appendChild(card);
-            });
-
-            document.getElementById('passes-count-active').innerText = activeCount;
-            document.getElementById('passes-count-overdue').innerText = overdueCount;
-        }
-
-        async function markPassPaid(id) {
-            try {
-                const { error } = await sb.from('passes').update({ last_paid_month: getCurrentCycleKey() }).eq('id', id);
-                if (error) throw error;
-                await loadData();
-                showToast('Pagamento registrado! Passe marcado como pago.', 'success');
-            } catch (err) {
-                showToast('Erro ao marcar como pago: ' + err.message, 'error');
-            }
-        }
-
-        async function unmarkPassPaid(id) {
-            try {
-                const { error } = await sb.from('passes').update({ last_paid_month: null }).eq('id', id);
-                if (error) throw error;
-                await loadData();
-                showToast('Pagamento desfeito.', 'success');
-            } catch (err) {
-                showToast('Erro ao desfazer pagamento: ' + err.message, 'error');
-            }
-        }
-
-        function editPass(id) {
-            const p = passes.find(x => x.id === id);
-            if (!p) return;
-            document.getElementById('pass-edit-id').value = p.id;
-            document.getElementById('pass-name').value = p.name;
-            document.getElementById('pass-due-day').value = p.dueDay;
-            document.getElementById('pass-note').value = p.note || '';
-            document.getElementById('pass-submit-btn').innerText = 'Atualizar Passe';
-            document.querySelector('#modal-pass h3 span').innerText = 'Editar Passe Mensal';
-            openModal('modal-pass');
-        }
-
-        async function handlePassSubmit(e) {
-            e.preventDefault();
-            const editId = document.getElementById('pass-edit-id').value;
-            const name = document.getElementById('pass-name').value.trim();
-            const dueDay = parseInt(document.getElementById('pass-due-day').value, 10);
-            const note = document.getElementById('pass-note').value.trim();
-
-            if (!name || !dueDay || dueDay < 1 || dueDay > 31) return;
-            if (!currentUser) return;
-
-            const btn = document.getElementById('pass-submit-btn');
-            btn.disabled = true;
-            btn.innerText = editId ? 'Atualizando...' : 'Salvando...';
-
-            try {
-                let error;
-                if (editId) {
-                    ({ error } = await sb.from('passes').update({ name, due_day: dueDay, note }).eq('id', editId));
-                } else {
-                    ({ error } = await sb.from('passes').insert({ user_id: currentUser.id, name, due_day: dueDay, note }));
-                }
-                if (error) throw error;
-
-                closeModal('modal-pass');
-                await loadData();
-                showToast(editId ? 'Passe atualizado!' : 'Passe cadastrado!', 'success');
-            } catch (err) {
-                showToast('Erro ao salvar passe: ' + err.message, 'error');
-            } finally {
-                btn.disabled = false;
-                const stillEditing = document.getElementById('pass-edit-id').value;
-                btn.innerText = stillEditing ? 'Atualizar Passe' : 'Salvar Passe';
-            }
-        }
-
-        async function deletePass(id) {
-            const ok = await confirmAction('Esse passe será excluído permanentemente.', 'Excluir passe?');
-            if (!ok) return;
-            try {
-                const { error } = await sb.from('passes').delete().eq('id', id);
-                if (error) throw error;
-                await loadData();
-                showToast('Passe excluído.', 'success');
-            } catch (err) {
-                showToast('Erro ao excluir passe: ' + err.message, 'error');
-            }
-        }
-
-        function buildTransactionRow(tx) {
-            const isIncome = tx.type === 'income';
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/50';
-
-            const badge = isIncome
-                ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Entrada</span>`
-                : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">Saída</span>`;
-
-            const formattedDate = new Date(tx.date + 'T00:00:00').toLocaleDateString('pt-BR');
-
-            row.innerHTML = `
-                <td class="p-4 font-medium text-slate-300">${formattedDate}</td>
-                <td class="p-4">${badge}</td>
-                <td class="p-4 font-semibold text-white">${tx.category}</td>
-                <td class="p-4 text-slate-400 max-w-[200px] truncate">${tx.desc || '-'}</td>
-                <td class="p-4 text-right font-extrabold ${isIncome ? 'text-emerald-400' : 'text-rose-400'}">
-                    ${isIncome ? '+' : '-'} ${formatBRL(tx.amount)}
-                </td>
-                <td class="p-4 text-center">
-                    <div class="flex items-center justify-center gap-3">
-                        <button onclick="editTransaction('${tx.id}')" class="text-slate-500 hover:text-brand-400 text-xs transition" title="Editar">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-                        <button onclick="deleteTransaction('${tx.id}')" class="text-slate-500 hover:text-rose-400 text-xs transition" title="Excluir">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            `;
-            return row;
-        }
-
-        function renderTables(filteredTx) {
-            const dashTable = document.getElementById('dashboard-recent-table');
-            const fullTable = document.getElementById('full-transactions-table');
-            
-            dashTable.innerHTML = '';
-            fullTable.innerHTML = '';
-
-            const dashSorted = [...filteredTx].sort((a,b) => new Date(b.date) - new Date(a.date));
-            const fullSorted = [...applyLancamentosFilters(filteredTx)].sort((a,b) => new Date(b.date) - new Date(a.date));
-
-            const emptyRow = (msg) => `<tr><td colspan="6" class="p-6 text-center text-slate-500 text-xs"><i class="fa-solid fa-inbox text-base mb-2 block"></i>${msg}</td></tr>`;
-
-            if (dashSorted.length === 0) {
-                dashTable.innerHTML = emptyRow('Nenhum lançamento encontrado para o período selecionado.');
-            } else {
-                dashSorted.slice(0, 5).forEach(tx => dashTable.appendChild(buildTransactionRow(tx)));
-            }
-
-            if (fullSorted.length === 0) {
-                fullTable.innerHTML = emptyRow('Nenhum lançamento encontrado com os filtros atuais.');
-            } else {
-                fullSorted.forEach(tx => fullTable.appendChild(buildTransactionRow(tx)));
-            }
-        }
-
-        function renderTemporalReports() {
-            const periods = ['today', 'week', 'month', 'year'];
-
-            periods.forEach(p => {
-                const list = filterTransactionsByPeriod(p);
-                const gross = list.filter(t => t.type === 'income').reduce((a, b) => a + b.amount, 0);
-                const expenses = list.filter(t => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
-                const net = gross - expenses;
-
-                document.getElementById(`report-${p}-gross`).innerText = formatBRL(gross);
-                document.getElementById(`report-${p}-expenses`).innerText = formatBRL(expenses);
-                document.getElementById(`report-${p}-net`).innerText = formatBRL(net);
-            });
-        }
-
-        function renderCharts(filteredTx) {
-            // Performance Bar Chart
-            const ctx1 = document.getElementById('chart-performance').getContext('2d');
-            
-            // Group by date
-            const dateMap = {};
-            filteredTx.forEach(t => {
-                if (!dateMap[t.date]) dateMap[t.date] = { income: 0, expense: 0 };
-                if (t.type === 'income') dateMap[t.date].income += t.amount;
-                else dateMap[t.date].expense += t.amount;
-            });
-
-            const labels = Object.keys(dateMap).sort().map(d => new Date(d + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
-            const incomes = Object.keys(dateMap).sort().map(d => dateMap[d].income);
-            const expenses = Object.keys(dateMap).sort().map(d => dateMap[d].expense);
-
-            if (chartPerformance) chartPerformance.destroy();
-
-            chartPerformance = new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: labels.length ? labels : ['Sem dados'],
-                    datasets: [
-                        {
-                            label: 'Entradas (Passagens)',
-                            data: incomes.length ? incomes : [0],
-                            backgroundColor: '#10b981',
-                            borderRadius: 6
-                        },
-                        {
-                            label: 'Saídas (Gasolina/Gastos)',
-                            data: expenses.length ? expenses : [0],
-                            backgroundColor: '#f43f5e',
-                            borderRadius: 6
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
-                    }
-                }
-            });
-
-            // Topics Doughnut Chart
-            const ctx2 = document.getElementById('chart-topics').getContext('2d');
-            const topicLabels = topics.map(t => `${t.name} (${t.percent}%)`);
-            const topicPercents = topics.map(t => t.percent);
-
-            if (chartTopics) chartTopics.destroy();
-
-            chartTopics = new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: topicLabels.length ? topicLabels : ['Sem Tópicos'],
-                    datasets: [{
-                        data: topicPercents.length ? topicPercents : [100],
-                        backgroundColor: ['#f59e0b', '#0284c7', '#10b981', '#a855f7', '#f43f5e'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { color: '#94a3b8', font: { size: 10 } }
-                        }
-                    }
-                }
-            });
-        }
-
-        // ==================== EXPORTAR CSV ====================
-        function exportCSV() {
-            const currentPeriod = document.getElementById('filter-period').value;
-            const filtered = applyLancamentosFilters(filterTransactionsByPeriod(currentPeriod));
-            if (!filtered.length) {
-                showToast('Nenhum lançamento para exportar com os filtros atuais.', 'error');
-                return;
-            }
-            const header = ['Data', 'Tipo', 'Categoria', 'Descricao', 'Valor'];
-            const rows = filtered.map(t => [
-                t.date,
-                t.type === 'income' ? 'Entrada' : 'Saida',
-                t.category,
-                (t.desc || '').replace(/,/g, ';'),
-                t.amount.toFixed(2)
-            ]);
-            const csv = [header, ...rows].map(r => r.join(',')).join('\n');
-            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `busfleet-lancamentos-${getFormattedDate(0)}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast('CSV exportado com sucesso!', 'success');
-        }
-
-        // ==================== EDIÇÃO ====================
-        function editTransaction(id) {
-            const tx = transactions.find(t => t.id === id);
-            if (!tx) return;
-            document.getElementById('tx-edit-id').value = tx.id;
-            document.querySelector(`input[name="tx-type"][value="${tx.type}"]`).checked = true;
-            toggleCategoryOptions();
-            document.getElementById('tx-category').value = tx.category;
-            document.getElementById('tx-amount').value = tx.amount;
-            document.getElementById('tx-date').value = tx.date;
-            document.getElementById('tx-desc').value = tx.desc || '';
-            document.getElementById('tx-submit-btn').innerText = 'Atualizar Lançamento';
-            document.querySelector('#modal-transaction h3 span').innerText = 'Editar Lançamento';
-            openModal('modal-transaction');
-        }
-
-        function editTopic(id) {
-            const t = topics.find(x => x.id === id);
-            if (!t) return;
-            document.getElementById('topic-edit-id').value = t.id;
-            document.getElementById('topic-name').value = t.name;
-            document.getElementById('topic-percent').value = t.percent;
-            document.getElementById('topic-icon').value = t.icon;
-            document.getElementById('topic-color').value = t.color;
-            document.getElementById('topic-submit-btn').innerText = 'Atualizar Tópico';
-            document.querySelector('#modal-topic h3 span').innerText = 'Editar Tópico';
-            openModal('modal-topic');
-        }
-
-        // ==================== CRUD (SUPABASE) ====================
-        async function handleTransactionSubmit(e) {
-            e.preventDefault();
-            const editId = document.getElementById('tx-edit-id').value;
-            const type = document.querySelector('input[name="tx-type"]:checked').value;
-            const category = document.getElementById('tx-category').value;
-            const amount = parseFloat(document.getElementById('tx-amount').value);
-            const date = document.getElementById('tx-date').value;
-            const desc = document.getElementById('tx-desc').value;
-
-            if (!amount || amount <= 0) return;
-            if (!currentUser) return;
-
-            const btn = document.getElementById('tx-submit-btn');
-            btn.disabled = true;
-            btn.innerText = editId ? 'Atualizando...' : 'Salvando...';
-
-            try {
-                let error;
-                if (editId) {
-                    ({ error } = await sb.from('transactions').update({ type, category, amount, date, description: desc }).eq('id', editId));
-                } else {
-                    ({ error } = await sb.from('transactions').insert({ user_id: currentUser.id, type, category, amount, date, description: desc }));
-                }
-                if (error) throw error;
-
-                closeModal('modal-transaction');
-                await loadData();
-                showToast(editId ? 'Lançamento atualizado!' : 'Lançamento salvo!', 'success');
-            } catch (err) {
-                showToast('Erro ao salvar lançamento: ' + err.message, 'error');
-            } finally {
-                btn.disabled = false;
-                const stillEditing = document.getElementById('tx-edit-id').value;
-                btn.innerText = stillEditing ? 'Atualizar Lançamento' : 'Salvar Lançamento';
-            }
-        }
-
-        async function handleTopicSubmit(e) {
-            e.preventDefault();
-            const editId = document.getElementById('topic-edit-id').value;
-            const name = document.getElementById('topic-name').value;
-            const percent = parseFloat(document.getElementById('topic-percent').value);
-            const icon = document.getElementById('topic-icon').value;
-            const color = document.getElementById('topic-color').value;
-
-            if (!name || !percent) return;
-            if (!currentUser) return;
-
-            const btn = document.getElementById('topic-submit-btn');
-            btn.disabled = true;
-            btn.innerText = editId ? 'Atualizando...' : 'Salvando...';
-
-            try {
-                let error;
-                if (editId) {
-                    ({ error } = await sb.from('topics').update({ name, percent, icon, color }).eq('id', editId));
-                } else {
-                    ({ error } = await sb.from('topics').insert({ user_id: currentUser.id, name, percent, icon, color }));
-                }
-                if (error) throw error;
-
-                closeModal('modal-topic');
-                await loadData();
-                showToast(editId ? 'Tópico atualizado!' : 'Tópico salvo!', 'success');
-            } catch (err) {
-                showToast('Erro ao salvar tópico: ' + err.message, 'error');
-            } finally {
-                btn.disabled = false;
-                const stillEditing = document.getElementById('topic-edit-id').value;
-                btn.innerText = stillEditing ? 'Atualizar Tópico' : 'Salvar Tópico';
-            }
-        }
-
-        async function deleteTransaction(id) {
-            const ok = await confirmAction('Esse lançamento será excluído permanentemente.', 'Excluir lançamento?');
-            if (!ok) return;
-            try {
-                const { error } = await sb.from('transactions').delete().eq('id', id);
-                if (error) throw error;
-                await loadData();
-                showToast('Lançamento excluído.', 'success');
-            } catch (err) {
-                showToast('Erro ao excluir lançamento: ' + err.message, 'error');
-            }
-        }
-
-        async function deleteTopic(id) {
-            const ok = await confirmAction('Esse tópico de alocação será excluído permanentemente.', 'Excluir tópico?');
-            if (!ok) return;
-            try {
-                const { error } = await sb.from('topics').delete().eq('id', id);
-                if (error) throw error;
-                await loadData();
-                showToast('Tópico excluído.', 'success');
-            } catch (err) {
-                showToast('Erro ao excluir tópico: ' + err.message, 'error');
-            }
-        }
-
-        // ==================== INICIALIZAÇÃO ====================
-        // A tela de login/app é controlada pelo onAuthStateChange acima.
-        // sb.auth já dispara o evento inicial (INITIAL_SESSION) ao carregar a página.
-    </script>
+    <select id="pagto"><option>Pix</option><option>Cartão</option><option>Dinheiro</option></select>
+    <textarea id="obs" rows="2" placeholder="Observações (opcional)"></textarea>
+    <div class="err" id="err" role="alert"></div>
+    <button class="send" id="send" disabled>Enviar pedido no WhatsApp</button>
+  </div>
+</aside>
+
+<script>
+/* ====== CONFIGURAÇÃO: edite só esta parte ====== */
+const CONFIG = {
+  loja: "Azhar Perfumaria",
+  whatsapp: "",                // PREFERIDO: DDI 55 + DDD + número, só dígitos (ex: 5574999999999)
+  link: "https://w.app/azharperfumaria", // usado só se o número acima ficar vazio
+  moeda: "BRL"
+};
+// cor = tom do frasco. Troque nome, preço, categoria e (opcional) foto: "img/nome.jpg"
+const PRODUTOS = [
+  {id:1,nome:"Perfume Árabe Âmbar",cat:"Masculino",ml:100,preco:149.9,cor:"#B8883A"},
+  {id:2,nome:"Oud Real",cat:"Masculino",ml:100,preco:189.9,cor:"#5A2A3C"},
+  {id:3,nome:"Rosa de Damasco",cat:"Feminino",ml:80,preco:169.9,cor:"#C0627E"},
+  {id:4,nome:"Jasmim Noturno",cat:"Feminino",ml:80,preco:159.9,cor:"#8E7CC3"},
+  {id:5,nome:"Almíscar Branco",cat:"Unissex",ml:100,preco:139.9,cor:"#9BB7B0"},
+  {id:6,nome:"Óleo Concentrado Sândalo",cat:"Óleos",ml:12,preco:59.9,cor:"#A0693A"},
+  {id:7,nome:"Óleo Concentrado Rosa",cat:"Óleos",ml:12,preco:59.9,cor:"#D58BA0"},
+  {id:8,nome:"Body Splash Baunilha",cat:"Body splash",ml:200,preco:49.9,cor:"#D9B77A"}
+];
+
+const $=id=>document.getElementById(id);
+const fmt=v=>v.toLocaleString("pt-BR",{style:"currency",currency:CONFIG.moeda});
+let cart={}, filtro="Todos";
+try{cart=JSON.parse(localStorage.getItem("azhar_cart")||"{}")}catch(e){}
+const save=()=>{try{localStorage.setItem("azhar_cart",JSON.stringify(cart))}catch(e){}};
+
+document.title=CONFIG.loja; $("storeName").textContent=CONFIG.loja.split(" ")[0].toUpperCase();
+
+function frasco(cor){return `<svg viewBox="0 0 120 170" aria-hidden="true"><rect x="46" y="6" width="28" height="22" rx="4" fill="${cor}"/><rect x="52" y="28" width="16" height="10" fill="${cor}" opacity=".6"/><rect x="14" y="38" width="92" height="124" rx="16" fill="${cor}" opacity=".25" stroke="${cor}" stroke-width="3"/><rect x="24" y="96" width="72" height="56" rx="8" fill="${cor}" opacity=".6"/></svg>`}
+
+function chips(){
+  const cats=["Todos",...new Set(PRODUTOS.map(p=>p.cat))];
+  $("chips").innerHTML=cats.map(c=>`<button class="chip" aria-pressed="${c===filtro}" data-c="${c}">${c}</button>`).join("");
+}
+function grid(){
+  $("grid").innerHTML=PRODUTOS.filter(p=>filtro==="Todos"||p.cat===filtro).map(p=>`
+  <article class="card">
+    <div class="pic" style="background:${p.cor}1f">${p.img?`<img src="${p.img}" alt="${p.nome}" style="width:100%;height:100%;object-fit:cover">`:frasco(p.cor)}</div>
+    <div class="info"><h3>${p.nome}</h3><small>${p.cat} · ${p.ml} ml</small>
+    <div class="price">${fmt(p.preco)}</div>
+    <button class="add" data-add="${p.id}">Adicionar ao carrinho</button></div>
+  </article>`).join("");
+}
+function render(){
+  const ids=Object.keys(cart).filter(id=>cart[id]>0);
+  let total=0,qtd=0;
+  $("items").innerHTML=ids.length?ids.map(id=>{
+    const p=PRODUTOS.find(x=>x.id==id); if(!p) return "";
+    const q=cart[id]; total+=p.preco*q; qtd+=q;
+    return `<div class="row"><div><b>${p.nome}</b><br><small>${p.ml} ml · ${fmt(p.preco)}</small></div>
+    <div class="qty"><button data-dec="${id}" aria-label="Diminuir">−</button><span>${q}</span><button data-inc="${id}" aria-label="Aumentar">+</button></div>
+    <button class="rm" data-rm="${id}">Remover</button><b style="text-align:right">${fmt(p.preco*q)}</b></div>`}).join("")
+    :`<div class="empty">Seu carrinho está vazio.<br>Adicione perfumes do catálogo.</div>`;
+  $("count").textContent=qtd; $("total").textContent=fmt(total); $("send").disabled=!qtd; save();
+}
+function open(on){$("drawer").classList.toggle("on",on);$("ovl").classList.toggle("on",on);$("drawer").setAttribute("aria-hidden",!on)}
+
+document.addEventListener("click",e=>{
+  const t=e.target;
+  if(t.dataset.c){filtro=t.dataset.c;chips();grid()}
+  if(t.dataset.add){cart[t.dataset.add]=(cart[t.dataset.add]||0)+1;render();open(true)}
+  if(t.dataset.inc){cart[t.dataset.inc]++;render()}
+  if(t.dataset.dec){cart[t.dataset.dec]=Math.max(0,cart[t.dataset.dec]-1);render()}
+  if(t.dataset.rm){delete cart[t.dataset.rm];render()}
+});
+$("openCart").onclick=()=>open(true); $("closeCart").onclick=()=>open(false); $("ovl").onclick=()=>open(false);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")open(false)});
+$("entrega").onchange=()=>{const on=$("entrega").value==="Entrega";$("end").hidden=!on;$("end").style.display=on?"grid":"none"};
+
+$("send").onclick=()=>{
+  const nome=$("nome").value.trim(), ent=$("entrega").value, v=id=>$(id).value.trim();
+  if(!nome){$("err").textContent="Informe seu nome para finalizar.";return}
+  if(ent==="Entrega"&&(!v("rua")||!v("bairro")||!v("cidade"))){$("err").textContent="Informe rua, número, bairro e cidade para a entrega.";return}
+  $("err").textContent="";
+  let total=0, linhas=Object.keys(cart).filter(id=>cart[id]>0).map(id=>{
+    const p=PRODUTOS.find(x=>x.id==id), sub=p.preco*cart[id]; total+=sub;
+    return `▪ ${cart[id]}x ${p.nome} (${p.ml} ml) — ${fmt(sub)}`});
+  const m=[`Olá, ${CONFIG.loja}! 👋`,`Meu nome é *${nome}* e gostaria de fazer este pedido:`,"",
+    "*🛍️ PEDIDO*",...linhas,"",`*Total: ${fmt(total)}*`,"",
+    "*💳 PAGAMENTO*",$("pagto").value,"",
+    "*📍 RECEBIMENTO*"];
+  if(ent==="Entrega"){
+    m.push("Entrega no endereço:",v("rua"),`${v("bairro")} - ${v("cidade")}`);
+    if(v("ref")) m.push("Referência: "+v("ref"));
+  } else m.push("Vou retirar na loja");
+  if(v("obs")) m.push("","*📝 OBSERVAÇÕES*",v("obs"));
+  m.push("","Aguardo a confirmação. Obrigado!");
+  const txt=encodeURIComponent(m.join("\n"));
+  const url=CONFIG.whatsapp?`https://wa.me/${CONFIG.whatsapp}?text=${txt}`:`${CONFIG.link}?text=${txt}`;
+  window.open(url,"_blank");
+};
+chips();grid();render();
+</script>
 </body>
 </html>
