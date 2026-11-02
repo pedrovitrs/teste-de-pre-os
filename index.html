@@ -1,96 +1,48 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Azhar Perfumaria</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-/* ====== CORES: troque aqui para casar com a identidade da loja ====== */
-:root{
-  --bg:#FAF5EE; --ink:#2A1420; --plum:#3B1A2E; --gold:#B8883A; --gold-soft:#E9D6AE;
-  --muted:#7B6A70; --line:#E6DAC9; --card:#FFFFFF; --ok:#1F7A4D;
-  --display:'Marcellus','Times New Roman',serif; --body:'Jost',system-ui,sans-serif;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){--bg:#1D0E17;--ink:#F5ECE0;--plum:#2A1220;--card:#2A1623;--line:#4A2C3D;--muted:#B9A5AE;--gold-soft:#5A4320}
-}
-*{box-sizing:border-box;margin:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.5}
-button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
-:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:14px 5vw;background:var(--plum);color:#F5ECE0}
-.logo{font-family:var(--display);font-size:1.5rem;letter-spacing:.14em}
-.cart-btn{display:flex;gap:10px;align-items:center;padding:9px 16px;border:1px solid var(--gold);border-radius:999px;color:#F5ECE0}
-.cart-btn b{background:var(--gold);color:var(--plum);border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;font-size:.8rem}
-.hero{background:var(--plum);color:#F5ECE0;padding:clamp(48px,9vw,110px) 5vw;display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center}
-.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(2.2rem,6vw,4.4rem);line-height:1.05;max-width:14ch}
-.hero p{margin:18px 0 26px;max-width:44ch;color:#D9C7CF}
-.btn{display:inline-block;background:var(--gold);color:var(--plum);padding:13px 26px;border-radius:999px;font-weight:600;text-decoration:none}
-.hero svg{width:100%;max-width:300px;justify-self:center}
-.bar{padding:34px 5vw 10px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.bar h2{font-family:var(--display);font-weight:400;font-size:1.9rem;margin-right:auto}
-.chip{padding:8px 16px;border:1px solid var(--line);border-radius:999px;font-size:.92rem}
-.chip[aria-pressed="true"]{background:var(--plum);color:#F5ECE0;border-color:var(--plum)}
-.grid{padding:16px 5vw 70px;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:22px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
-.card .pic{aspect-ratio:1;display:grid;place-items:center}
-.card .pic svg{width:46%}
-.card .info{padding:14px 16px 16px;display:flex;flex-direction:column;gap:4px;flex:1}
-.card h3{font-family:var(--display);font-weight:400;font-size:1.15rem}
-.card small{color:var(--muted)}
-.price{margin-top:auto;padding-top:8px;font-weight:600;font-size:1.1rem}
-.add{margin-top:10px;padding:10px;border-radius:10px;background:var(--plum);color:#F5ECE0;font-weight:500}
-.add:hover{background:var(--gold);color:var(--plum)}
-.ovl{position:fixed;inset:0;background:rgba(20,8,14,.55);opacity:0;pointer-events:none;transition:.25s;z-index:30}
-.ovl.on{opacity:1;pointer-events:auto}
-aside{position:fixed;top:0;right:0;height:100vh;height:100dvh;width:min(440px,100%);background:var(--bg);z-index:31;transform:translateX(100%);transition:transform .3s;display:flex;flex-direction:column;box-shadow:-10px 0 40px rgba(0,0,0,.25)}
-aside.on{transform:none}
-.ch{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line)}
-.ch h2{font-family:var(--display);font-weight:400}
-.items{flex:1 1 auto;min-height:90px;overflow:auto;padding:8px 22px}
-.row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:14px 0;border-bottom:1px solid var(--line)}
-.row .qty{display:flex;align-items:center;gap:10px}
-.row .qty button{width:28px;height:28px;border:1px solid var(--line);border-radius:50%}
-.row .rm{color:var(--muted);font-size:.85rem;text-decoration:underline}
-.empty{padding:40px 0;text-align:center;color:var(--muted)}
-.foot{flex:0 1 auto;max-height:68%;overflow-y:auto;padding:16px 22px 22px;border-top:1px solid var(--line);display:grid;gap:10px;align-content:start}
-.send{position:sticky;bottom:0}
-.foot input,.foot select,.foot textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
-.total{display:flex;justify-content:space-between;font-size:1.2rem;font-weight:600}
-.send{background:var(--ok);color:#fff;padding:14px;border-radius:12px;font-weight:600;font-size:1rem}
-.send:disabled{opacity:.4;cursor:not-allowed}
-.err{color:#B3261E;font-size:.85rem;min-height:1em}
-footer{padding:30px 5vw;text-align:center;color:var(--muted);border-top:1px solid var(--line);font-size:.9rem}
-@media(max-width:720px){.hero{grid-template-columns:1fr}.hero svg{max-width:180px;order:-1}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4eadf">
+  <meta name="description" content="AZHAR Perfumaria — fragrâncias marcantes, cuidado e beleza com elegância.">
+  <title>AZHAR Perfumaria — sua essência, sua assinatura</title>
+  <style>
+    :root{--cream:#F4EADF;--pearl:#FFFCF7;--gold:#B59670;--espresso:#46382F;--muted:#81766d;--line:#e8ddd1;--white:#fff;--shadow:0 18px 55px #46382f12}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--pearl);color:var(--espresso);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button,a{-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:none}.announcement{background:var(--espresso);color:var(--cream);text-align:center;padding:9px 16px;font-size:11px;letter-spacing:.14em;text-transform:uppercase}.header{position:sticky;top:0;z-index:20;background:#fffcf7ed;backdrop-filter:blur(12px);border-bottom:1px solid #e8ddd180}.nav{max-width:1180px;margin:auto;height:78px;padding:0 28px;display:flex;align-items:center;justify-content:space-between}.brand{font-family:Georgia,serif;font-size:28px;letter-spacing:.15em;font-weight:500}.brand small{display:block;font:9px system-ui;letter-spacing:.32em;color:var(--gold);text-align:center;margin-top:1px}.navlinks{display:flex;gap:32px;font-size:13px;color:#61554c}.navlinks a:hover{color:var(--gold)}.cart-button,.primary,.secondary{border:0;cursor:pointer;transition:.2s}.cart-button{background:none;color:var(--espresso);font-size:13px}.cart-count{display:inline-grid;place-items:center;background:var(--gold);color:white;border-radius:50%;width:21px;height:21px;margin-left:7px;font-size:11px}.hero{max-width:1180px;margin:auto;padding:38px 28px 72px;display:grid;grid-template-columns:1.05fr .95fr;gap:34px;align-items:center}.hero-copy{padding:30px 4vw 30px 0}.eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#947959}.hero h1{font:400 clamp(48px,6vw,78px)/.99 Georgia,serif;letter-spacing:-.045em;margin:20px 0}.hero h1 em{font-weight:400;color:var(--gold)}.hero-copy p{color:var(--muted);line-height:1.8;max-width:440px;font-size:15px}.hero-actions{display:flex;align-items:center;gap:21px;margin-top:28px}.primary{display:inline-flex;background:var(--espresso);color:var(--pearl);padding:15px 23px;font-size:12px;letter-spacing:.08em}.primary:hover{background:#5d4a3f;transform:translateY(-1px)}.textlink{font-size:12px;border-bottom:1px solid var(--gold);padding-bottom:4px}.hero-visual{height:510px;position:relative;overflow:hidden;background:linear-gradient(140deg,#e7d7c5,#c4a77f 55%,#846955);display:grid;place-items:center}.hero-visual:before{content:"";position:absolute;width:310px;height:310px;border:1px solid #fff8;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)}.hero-visual:after{content:"";position:absolute;width:250px;height:250px;border:1px solid #fff6;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)}.bottle{position:relative;z-index:1;width:150px;height:245px;border-radius:22px 22px 30px 30px;background:linear-gradient(100deg,#e9dac5,#fff9ed 28%,#ddc4a4 70%,#b99a78);box-shadow:18px 24px 40px #46382f42;display:flex;align-items:center;justify-content:center;flex-direction:column;border:1px solid #fff9}.bottle:before{content:"";position:absolute;width:59px;height:41px;background:linear-gradient(90deg,#a88b69,#e0c8a6,#9f805c);top:-38px;border-radius:5px 5px 1px 1px}.bottle:after{content:"";position:absolute;width:77px;height:12px;background:#d5c1a5;top:-8px;border-radius:3px}.bottle-name{font:20px Georgia,serif;letter-spacing:.18em;color:#6a5140}.bottle-sub{font-size:7px;letter-spacing:.25em;margin-top:7px;color:#876f59}.visual-caption{position:absolute;bottom:23px;left:24px;color:#fff;font:italic 14px Georgia,serif;letter-spacing:.05em}.section{max-width:1180px;margin:auto;padding:65px 28px}.section-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:26px}.section h2{font:400 clamp(34px,4vw,48px) Georgia,serif;margin:10px 0 0;letter-spacing:-.03em}.section-head p{color:var(--muted);font-size:13px;margin:0}.products{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.product{background:var(--white);border:1px solid #eee6dd;transition:.25s;position:relative}.product:hover{transform:translateY(-4px);box-shadow:var(--shadow)}.product-art{height:240px;display:grid;place-items:center;position:relative;overflow:hidden;background:#f0e5d8}.product:nth-child(2) .product-art{background:#e4d7cc}.product:nth-child(3) .product-art{background:#e9dfcf}.product:nth-child(4) .product-art{background:#d9c9b8}.mini-bottle{position:relative;width:90px;height:137px;background:linear-gradient(100deg,#b9976e,#f7ead6 35%,#bb9872);border-radius:13px 13px 19px 19px;box-shadow:9px 15px 24px #46382f2e;display:grid;place-items:center}.mini-bottle:before{content:"";position:absolute;top:-23px;width:34px;height:25px;background:linear-gradient(90deg,#a38461,#d7bd98,#90704f);border-radius:4px 4px 0 0}.mini-bottle:after{content:"";position:absolute;top:-3px;width:48px;height:8px;background:#d5c1a5}.mini-bottle span{font:12px Georgia,serif;letter-spacing:.12em;color:#624b39}.badge{position:absolute;top:13px;left:13px;background:#fffcf7d9;padding:7px 9px;font-size:9px;letter-spacing:.1em;text-transform:uppercase}.product-info{padding:16px}.product-category{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#9b8265}.product h3{font:20px Georgia,serif;margin:8px 0 5px}.product p{font-size:11px;color:var(--muted);margin:0 0 16px}.product-bottom{display:flex;justify-content:space-between;align-items:center}.price{font-size:15px;font-weight:600}.add{width:33px;height:33px;border:1px solid var(--line);background:white;color:var(--espresso);font-size:20px;cursor:pointer}.add:hover{background:var(--espresso);color:white}.story{background:var(--cream);margin-top:25px}.story-inner{max-width:1180px;margin:auto;padding:65px 28px;display:grid;grid-template-columns:1fr 1fr;gap:55px;align-items:center}.story-art{height:330px;background:linear-gradient(135deg,#dac6ac,#b59670);display:grid;place-items:center;position:relative}.story-art span{font:italic 35px Georgia,serif;color:#fff8;letter-spacing:.08em}.story-copy p{color:#776b61;font-size:14px;line-height:1.9}.values{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:25px}.value{border-top:1px solid #cdb99f;padding-top:12px;font:14px Georgia,serif}.value small{display:block;font:10px system-ui;color:var(--muted);margin-top:5px}.footer{background:var(--espresso);color:var(--cream);padding:45px 28px}.footer-inner{max-width:1180px;margin:auto;display:flex;justify-content:space-between;align-items:center}.footer .brand small{color:#c2a984}.footer p{font-size:11px;color:#d3c6b8}.cart-panel{position:fixed;inset:0;z-index:40;display:none}.cart-panel.open{display:block}.scrim{position:absolute;inset:0;background:#211a16a6}.drawer{position:absolute;right:0;top:0;height:100%;width:min(480px,100%);background:var(--pearl);padding:26px;overflow:auto;box-shadow:-15px 0 50px #0002}.drawer-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:17px}.drawer-head h2{font:30px Georgia,serif;margin:0}.close{border:0;background:none;font-size:25px;cursor:pointer;color:var(--espresso)}.cart-items{padding:12px 0}.empty{color:var(--muted);font-size:13px;padding:22px 0}.cart-row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:14px 0}.cart-row strong{font:17px Georgia,serif}.cart-row small{display:block;color:var(--muted);margin-top:4px}.qty{display:flex;align-items:center;gap:10px}.qty button{width:27px;height:27px;background:var(--cream);border:0;cursor:pointer}.total{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding:17px 0;font-weight:600}.checkout h3{font:23px Georgia,serif;margin:23px 0 14px}.field{margin:11px 0}.field label{font-size:10px;display:block;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;color:#76695f}.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);background:white;padding:12px;color:var(--espresso);outline-color:var(--gold);font-size:13px}.field textarea{resize:vertical;min-height:67px}.fields-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.send-order{width:100%;justify-content:center;margin:10px 0}.fineprint{font-size:10px;line-height:1.6;color:var(--muted);text-align:center}.toast{position:fixed;z-index:60;bottom:22px;left:50%;transform:translate(-50%,20px);opacity:0;background:var(--espresso);color:white;padding:12px 18px;font-size:12px;transition:.25s;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:760px){.nav{height:66px;padding:0 18px}.navlinks{display:none}.brand{font-size:23px}.hero{grid-template-columns:1fr;padding:20px 18px 45px;gap:18px}.hero-copy{padding:30px 0 5px}.hero h1{font-size:58px}.hero-visual{height:370px}.hero-visual:before{width:260px;height:260px}.hero-visual:after{width:210px;height:210px}.section{padding:48px 18px}.section-head{align-items:start;gap:12px;flex-direction:column}.products{grid-template-columns:repeat(2,1fr);gap:10px}.product-art{height:190px}.product-info{padding:12px}.product h3{font-size:17px}.story-inner{grid-template-columns:1fr;gap:28px;padding:48px 18px}.story-art{height:240px}.footer-inner{gap:20px;align-items:start;flex-direction:column}.fields-two{grid-template-columns:1fr 1fr}}
+    @media(max-width:390px){.products{grid-template-columns:1fr 1fr}.product-art{height:155px}.mini-bottle{transform:scale(.82)}.hero h1{font-size:50px}.fields-two{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
-<header class="top">
-  <div class="logo" id="storeName">AZHAR</div>
-  <button class="cart-btn" id="openCart" aria-label="Abrir carrinho">Carrinho <b id="count">0</b></button>
-</header>
-
-<section class="hero">
-  <div>
-    <h1>Perfumes que ficam na memória</h1>
-    <p>Escolha suas fragrâncias, monte o carrinho e finalize o pedido direto pelo WhatsApp.</p>
-    <a class="btn" href="#catalogo">Ver perfumes</a>
-  </div>
-  <svg viewBox="0 0 120 170" aria-hidden="true"><rect x="46" y="6" width="28" height="22" rx="4" fill="#B8883A"/><rect x="52" y="28" width="16" height="10" fill="#E9D6AE"/><rect x="14" y="38" width="92" height="124" rx="16" fill="none" stroke="#B8883A" stroke-width="3"/><rect x="24" y="96" width="72" height="56" rx="8" fill="#B8883A" opacity=".35"/><circle cx="60" cy="72" r="13" fill="none" stroke="#E9D6AE" stroke-width="2"/></svg>
-</section>
-
-<div class="bar" id="catalogo">
-  <h2>Catálogo</h2>
-  <div id="chips" role="group" aria-label="Filtrar por categoria" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-</div>
-<main class="grid" id="grid"></main>
-<footer id="foot">Pedidos finalizados pelo WhatsApp</footer>
-
-<div class="ovl" id="ovl"></div>
-<aside id="drawer" aria-label="Carrinho" aria-hidden="true">
-  <div class="ch"><h2>Seu carrinho</h2><button id="closeCart" aria-label="Fechar">✕</button></div>
+  <div class="announcement">Elegância em cada detalhe · Encomende pelo WhatsApp</div>
+  <header class="header"><nav class="nav" aria-label="Navegação principal"><a class="brand" href="#inicio">AZHAR<small>PERFUMARIA</small></a><div class="navlinks"><a href="#inicio">Início</a><a href="#colecao">Coleção</a><a href="#essencia">Nossa essência</a></div><button class="cart-button" id="openCart" aria-label="Abrir sacola">Sacola <span class="cart-count" id="cartCount">0</span></button></nav></header>
+  <main>
+    <section class="hero" id="inicio"><div class="hero-copy"><span class="eyebrow">Perfumaria · Curadoria especial</span><h1>Sua essência,<br>sua <em>assinatura.</em></h1><p>Fragrâncias que traduzem presença, cuidado e personalidade. Encontre o perfume que conta a sua história.</p><div class="hero-actions"><a class="primary" href="#colecao">Descobrir fragrâncias</a><a class="textlink" href="#essencia">Conheça a AZHAR</a></div></div><div class="hero-visual" role="img" aria-label="Frasco elegante de perfume em tons dourados"><div class="bottle"><span class="bottle-name">AZHAR</span><span class="bottle-sub">EAU DE PARFUM</span></div><span class="visual-caption">Uma presença que fica.</span></div></section>
+    <section class="section" id="colecao"><div class="section-head"><div><span class="eyebrow">Escolhas para você</span><h2>A coleção AZHAR</h2></div><p>Descubra seu próximo favorito</p></div><div class="products" id="products"></div></section>
+    <section class="story" id="essencia"><div class="story-inner"><div class="story-art"><span>AZHAR</span></div><div class="story-copy"><span class="eyebrow">Nossa essência</span><h2>Beleza que começa<br>nos detalhes.</h2><p>A AZHAR nasceu para celebrar a expressão única de cada pessoa. Nossa curadoria reúne fragrâncias e cuidados escolhidos com carinho, em uma experiência feita para tornar especial cada momento — do primeiro borrifo ao último detalhe.</p><div class="values"><div class="value">Curadoria<small>Escolhas com intenção</small></div><div class="value">Cuidado<small>Atendimento próximo</small></div><div class="value">Presença<small>Seu jeito de marcar</small></div></div></div></div></section>
+  </main>
+  <footer class="footer"><div class="footer-inner"><a class="brand" href="#inicio">AZHAR<small>PERFUMARIA</small></a><p>Elegância, cuidado e personalidade em cada essência.</p><p>© <span id="year"></span> AZHAR Perfumaria</p></div></footer>
+  <div class="cart-panel" id="cartPanel" aria-hidden="true"><div class="scrim" id="scrim"></div><aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="cartTitle"><div class="drawer-head"><h2 id="cartTitle">Sua sacola</h2><button class="close" id="closeCart" aria-label="Fechar">×</button></div><div class="cart-items" id="cartItems"></div><div class="total"><span>Total do pedido</span><span id="cartTotal">R$ 0,00</span></div><form class="checkout" id="checkout"><h3>Dados para o pedido</h3><div class="field"><label for="customer">Seu nome</label><input id="customer" name="customer" autocomplete="name" required placeholder="Como podemos chamar você?"></div><div class="fields-two"><div class="field"><label for="phone">Seu telefone</label><input id="phone" name="phone" type="tel" autocomplete="tel" required placeholder="(00) 00000-0000"></div><div class="field"><label for="delivery">Entrega</label><select id="delivery" name="delivery"><option>Entrega no endereço</option><option>Retirada combinada</option></select></div></div><div class="field"><label for="address">Endereço completo</label><textarea id="address" name="address" autocomplete="street-address" required placeholder="Rua, número, bairro, cidade e complemento"></textarea></div><div class="field"><label for="payment">Forma de pagamento preferida</label><select id="payment" name="payment"><option>A combinar pelo WhatsApp</option><option>Pix</option><option>Cartão</option><option>Dinheiro</option></select></div><div class="field"><label for="notes">Observações</label><input id="notes" name="notes" placeholder="Referência, horário ou pedido especial"></div><button class="primary send-order" type="submit">Confirmar pedido pelo WhatsApp</button><p class="fineprint">Você vai revisar a mensagem no WhatsApp antes de enviá-la. O pedido só será confirmado após o atendimento.</p></form></aside></div>
+  <div class="toast" id="toast" role="status"></div>
+  <script>
+    // Ajuste os nomes, preços e descrições para os produtos reais da loja.
+    const WHATSAPP_NUMBER = '5574991974840';
+    const products = [
+      {id:1,name:'Âmbar Dourado',category:'Eau de parfum · 100 ml',description:'Notas quentes e envolventes',price:189.90,badge:'Mais vendido'},
+      {id:2,name:'Jardim de Íris',category:'Eau de parfum · 75 ml',description:'Floral delicado e luminoso',price:159.90,badge:'Favorito'},
+      {id:3,name:'Noite de Oud',category:'Eau de parfum · 100 ml',description:'Amadeirado, intenso e marcante',price:229.90,badge:'Intenso'},
+      {id:4,name:'Brisa de Seda',category:'Body splash · 200 ml',description:'Frescor leve para o dia a dia',price:89.90,badge:'Leveza'}
+    ];
+    const cart = {};
+    const money = n => n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    const productsEl=document.getElementById('products'), itemsEl=document.getElementById('cartItems');
+    productsEl.innerHTML=products.map((p,i)=>`<article class="product"><div class="product-art"><span class="badge">${p.badge}</span><div class="mini-bottle"><span>${['AZHAR','ÍRIS','OUD','SILK'][i]}</span></div></div><div class="product-info"><span class="product-category">${p.category}</span><h3>${p.name}</h3><p>${p.description}</p><div class="product-bottom"><span class="price">${money(p.price)}</span><button class="add" data-id="${p.id}" aria-label="Adicionar ${p.name} à sacola">+</button></div></div></article>`).join('');
+    function renderCart(){const entries=products.filter(p=>cart[p.id]);const count=entries.reduce((n,p)=>n+cart[p.id],0);document.getElementById('cartCount').textContent=count;document.getElementById('cartTotal').textContent=money(entries.reduce((n,p)=>n+p.price*cart[p.id],0));itemsEl.innerHTML=entries.length?entries.map(p=>`<div class="cart-row"><div><strong>${p.name}</strong><small>${money(p.price)} cada</small></div><div class="qty"><button data-change="-1" data-id="${p.id}" aria-label="Remover uma unidade">−</button><span>${cart[p.id]}</span><button data-change="1" data-id="${p.id}" aria-label="Adicionar uma unidade">+</button></div></div>`).join(''):'<p class="empty">Sua sacola está vazia. Escolha uma fragrância para começar.</p>';}
+    function openCart(){document.getElementById('cartPanel').classList.add('open');document.getElementById('cartPanel').setAttribute('aria-hidden','false');document.body.style.overflow='hidden'}function closeCart(){document.getElementById('cartPanel').classList.remove('open');document.getElementById('cartPanel').setAttribute('aria-hidden','true');document.body.style.overflow=''}
+    productsEl.addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(!b)return;const id=Number(b.dataset.id);cart[id]=(cart[id]||0)+1;renderCart();toast('Adicionado à sua sacola')});itemsEl.addEventListener('click',e=>{const b=e.target.closest('[data-change]');if(!b)return;const id=Number(b.dataset.id);cart[id]=(cart[id]||0)+Number(b.dataset.change);if(cart[id]<=0)delete cart[id];renderCart()});
+    document.getElementById('openCart').addEventListener('click',openCart);document.getElementById('closeCart').addEventListener('click',closeCart);document.getElementById('scrim').addEventListener('click',closeCart);document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCart()});
+    document.getElementById('checkout').addEventListener('submit',e=>{e.preventDefault();const entries=products.filter(p=>cart[p.id]);if(!entries.length){toast('Adicione pelo menos um produto à sacola');return}const f=new FormData(e.currentTarget);const lines=entries.map(p=>`• ${p.name} — ${cart[p.id]} un. × ${money(p.price)} = ${money(cart[p.id]*p.price)}`);const total=entries.reduce((n,p)=>n+p.price*cart[p.id],0);const message=['Olá! Quero confirmar este pedido da AZHAR Perfumaria.','',...lines,'',`TOTAL: ${money(total)}`,'',`Nome: ${f.get('customer')}`,`Telefone: ${f.get('phone')}`,`Entrega: ${f.get('delivery')}`,`Endereço: ${f.get('address')}`,`Pagamento preferido: ${f.get('payment')}`,`Observações: ${f.get('notes')||'Nenhuma'}`].join('\n');window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,'_blank','noopener,noreferrer')});
+    let timer;function toast(text){const el=document.getElementById('toast');el.textContent=text;el.classList.add('show');clearTimeout(timer);timer=setTimeout(()=>el.classList.remove('show'),2200)}document.getElementById('year').textContent=new Date().getFullYear();renderCart();
+  </script>
+</body>
+</html>
