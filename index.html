@@ -166,18 +166,18 @@ function render(){
     :`<div class="empty">Seu carrinho está vazio.<br>Adicione perfumes do catálogo.</div>`;
   $("count").textContent=qtd; $("total").textContent=fmt(total); $("send").disabled=!qtd; save();
 }
-function open(on){$("drawer").classList.toggle("on",on);$("ovl").classList.toggle("on",on);$("drawer").setAttribute("aria-hidden",!on)}
+function toggleCart(on){$("drawer").classList.toggle("on",on);$("ovl").classList.toggle("on",on);$("drawer").setAttribute("aria-hidden",!on)}
 
 document.addEventListener("click",e=>{
   const t=e.target;
   if(t.dataset.c){filtro=t.dataset.c;chips();grid()}
-  if(t.dataset.add){cart[t.dataset.add]=(cart[t.dataset.add]||0)+1;render();open(true)}
+  if(t.dataset.add){cart[t.dataset.add]=(cart[t.dataset.add]||0)+1;render();toggleCart(true)}
   if(t.dataset.inc){cart[t.dataset.inc]++;render()}
   if(t.dataset.dec){cart[t.dataset.dec]=Math.max(0,cart[t.dataset.dec]-1);render()}
   if(t.dataset.rm){delete cart[t.dataset.rm];render()}
 });
-$("openCart").onclick=()=>open(true); $("closeCart").onclick=()=>open(false); $("ovl").onclick=()=>open(false);
-document.addEventListener("keydown",e=>{if(e.key==="Escape")open(false)});
+$("openCart").onclick=()=>toggleCart(true); $("closeCart").onclick=()=>toggleCart(false); $("ovl").onclick=()=>toggleCart(false);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleCart(false)});
 $("entrega").onchange=()=>{const on=$("entrega").value==="Entrega";$("end").hidden=!on;$("end").style.display=on?"grid":"none"};
 
 $("send").onclick=()=>{
@@ -200,7 +200,7 @@ $("send").onclick=()=>{
   m.push("","Aguardo a confirmação. Obrigado!");
   const txt=encodeURIComponent(m.join("\n"));
   const url=CONFIG.whatsapp?`https://wa.me/${CONFIG.whatsapp}?text=${txt}`:`${CONFIG.link}?text=${txt}`;
-  window.open(url,"_blank");
+  const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();
 };
 chips();grid();render();
 </script>
