@@ -185,6 +185,8 @@ $("openCart").onclick=()=>toggleCart(true); $("closeCart").onclick=()=>toggleCar
 document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleCart(false)});
 $("entrega").onchange=()=>{const on=$("entrega").value==="Entrega";$("end").hidden=!on;$("end").style.display=on?"grid":"none"};
 
+/* Emojis por código Unicode (sem seletores de variação) - aparecem no iPhone e no Android */
+const E={oi:"\u{1F44B}",pedido:"\u{1F6D2}",pgto:"\u{1F4B3}",local:"\u{1F4CD}",obs:"\u{1F4DD}",ok:"\u{1F64F}"};
 $("send").onclick=()=>{
   const nome=$("nome").value.trim(), ent=$("entrega").value, v=id=>$(id).value.trim();
   if(!nome){$("err").textContent="Informe seu nome para finalizar.";return}
@@ -192,17 +194,17 @@ $("send").onclick=()=>{
   $("err").textContent="";
   let total=0, linhas=Object.keys(cart).filter(id=>cart[id]>0).map(id=>{
     const p=PRODUTOS.find(x=>x.id==id), sub=p.preco*cart[id]; total+=sub;
-    return `▪ ${cart[id]}x ${p.nome} (${p.ml} ml) — ${fmt(sub)}`});
-  const m=[`Olá, ${CONFIG.loja}! 👋`,`Meu nome é *${nome}* e gostaria de fazer este pedido:`,"",
-    "*🛍️ PEDIDO*",...linhas,"",`*Total: ${fmt(total)}*`,"",
-    "*💳 PAGAMENTO*",$("pagto").value,"",
-    "*📍 RECEBIMENTO*"];
+    return `- ${cart[id]}x ${p.nome} (${p.ml} ml) - ${fmt(sub)}`});
+  const m=[`Olá, ${CONFIG.loja}! ${E.oi}`,`Meu nome é *${nome}* e gostaria de fazer este pedido:`,"",
+    `${E.pedido} *PEDIDO*`,...linhas,"",`*Total: ${fmt(total)}*`,"",
+    `${E.pgto} *PAGAMENTO*`,$("pagto").value,"",
+    `${E.local} *RECEBIMENTO*`];
   if(ent==="Entrega"){
     m.push("Entrega no endereço:",`${v("rua")}, ${v("num")}${v("comp")?" - "+v("comp"):""}`,`Bairro: ${v("bairro")}`,`${v("cidade")} - ${v("uf")}${v("cep")?" | CEP "+v("cep"):""}`);
     if(v("ref")) m.push("Referência: "+v("ref"));
   } else m.push("Vou retirar na loja");
-  if(v("obs")) m.push("","*📝 OBSERVAÇÕES*",v("obs"));
-  m.push("","Aguardo a confirmação. Obrigado!");
+  if(v("obs")) m.push("",`${E.obs} *OBSERVAÇÕES*`,v("obs"));
+  m.push("",`Aguardo a confirmação. Obrigado! ${E.ok}`);
   const txt=encodeURIComponent(m.join("\n"));
   const url=CONFIG.whatsapp?`https://wa.me/${CONFIG.whatsapp}?text=${txt}`:`${CONFIG.link}?text=${txt}`;
   window.location.href=url;
