@@ -47,17 +47,18 @@ header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;just
 .add:hover{background:var(--gold);color:var(--plum)}
 .ovl{position:fixed;inset:0;background:rgba(20,8,14,.55);opacity:0;pointer-events:none;transition:.25s;z-index:30}
 .ovl.on{opacity:1;pointer-events:auto}
-aside{position:fixed;top:0;right:0;height:100%;width:min(440px,100%);background:var(--bg);z-index:31;transform:translateX(100%);transition:transform .3s;display:flex;flex-direction:column;box-shadow:-10px 0 40px rgba(0,0,0,.25)}
+aside{position:fixed;top:0;right:0;height:100vh;height:100dvh;width:min(440px,100%);background:var(--bg);z-index:31;transform:translateX(100%);transition:transform .3s;display:flex;flex-direction:column;box-shadow:-10px 0 40px rgba(0,0,0,.25)}
 aside.on{transform:none}
 .ch{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line)}
 .ch h2{font-family:var(--display);font-weight:400}
-.items{flex:1;overflow:auto;padding:8px 22px}
+.items{flex:1 1 auto;min-height:90px;overflow:auto;padding:8px 22px}
 .row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:14px 0;border-bottom:1px solid var(--line)}
 .row .qty{display:flex;align-items:center;gap:10px}
 .row .qty button{width:28px;height:28px;border:1px solid var(--line);border-radius:50%}
 .row .rm{color:var(--muted);font-size:.85rem;text-decoration:underline}
 .empty{padding:40px 0;text-align:center;color:var(--muted)}
-.foot{padding:16px 22px 22px;border-top:1px solid var(--line);display:grid;gap:10px}
+.foot{flex:0 1 auto;max-height:68%;overflow-y:auto;padding:16px 22px 22px;border-top:1px solid var(--line);display:grid;gap:10px;align-content:start}
+.send{position:sticky;bottom:0}
 .foot input,.foot select,.foot textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
 .total{display:flex;justify-content:space-between;font-size:1.2rem;font-weight:600}
 .send{background:var(--ok);color:#fff;padding:14px;border-radius:12px;font-weight:600;font-size:1rem}
@@ -99,9 +100,13 @@ footer{padding:30px 5vw;text-align:center;color:var(--muted);border-top:1px soli
     <input id="nome" placeholder="Seu nome" autocomplete="name">
     <select id="entrega"><option>Retirar na loja</option><option>Entrega</option></select>
     <div id="end" hidden style="display:none;gap:10px">
-      <input id="rua" placeholder="Rua e número" autocomplete="street-address">
+      <input id="rua" placeholder="Rua / Avenida" autocomplete="address-line1">
+      <input id="num" placeholder="Número (ou S/N)" inputmode="numeric">
+      <input id="comp" placeholder="Complemento (apto, bloco, casa...)">
       <input id="bairro" placeholder="Bairro">
-      <input id="cidade" placeholder="Cidade" value="Barra do Mendes">
+      <input id="cidade" placeholder="Cidade" value="Barra do Mendes" autocomplete="address-level2">
+      <select id="uf" aria-label="Estado"><option>BA</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select>
+      <input id="cep" placeholder="CEP (opcional)" inputmode="numeric" autocomplete="postal-code">
       <input id="ref" placeholder="Ponto de referência (opcional)">
     </div>
     <select id="pagto"><option>Pix</option><option>Cartão</option><option>Dinheiro</option></select>
@@ -115,7 +120,7 @@ footer{padding:30px 5vw;text-align:center;color:var(--muted);border-top:1px soli
 /* ====== CONFIGURAÇÃO: edite só esta parte ====== */
 const CONFIG = {
   loja: "Azhar Perfumaria",
-  whatsapp: "",                // PREFERIDO: DDI 55 + DDD + número, só dígitos (ex: 5574999999999)
+  whatsapp: "557498174314",                // PREFERIDO: DDI 55 + DDD + número, só dígitos (ex: 557498174314 = 74 9817-4314)
   link: "https://w.app/azharperfumaria", // usado só se o número acima ficar vazio
   moeda: "BRL"
 };
@@ -132,7 +137,7 @@ const PRODUTOS = [
 ];
 
 const $=id=>document.getElementById(id);
-const fmt=v=>v.toLocaleString("pt-BR",{style:"currency",currency:CONFIG.moeda});
+const fmt=v=>v.toLocaleString("pt-BR",{style:"currency",currency:CONFIG.moeda}).replace(/\u00a0/g," ");
 let cart={}, filtro="Todos";
 try{cart=JSON.parse(localStorage.getItem("azhar_cart")||"{}")}catch(e){}
 const save=()=>{try{localStorage.setItem("azhar_cart",JSON.stringify(cart))}catch(e){}};
@@ -183,7 +188,7 @@ $("entrega").onchange=()=>{const on=$("entrega").value==="Entrega";$("end").hidd
 $("send").onclick=()=>{
   const nome=$("nome").value.trim(), ent=$("entrega").value, v=id=>$(id).value.trim();
   if(!nome){$("err").textContent="Informe seu nome para finalizar.";return}
-  if(ent==="Entrega"&&(!v("rua")||!v("bairro")||!v("cidade"))){$("err").textContent="Informe rua, número, bairro e cidade para a entrega.";return}
+  if(ent==="Entrega"&&(!v("rua")||!v("num")||!v("bairro")||!v("cidade"))){$("err").textContent="Informe rua, número, bairro e cidade para a entrega.";return}
   $("err").textContent="";
   let total=0, linhas=Object.keys(cart).filter(id=>cart[id]>0).map(id=>{
     const p=PRODUTOS.find(x=>x.id==id), sub=p.preco*cart[id]; total+=sub;
@@ -193,14 +198,14 @@ $("send").onclick=()=>{
     "*💳 PAGAMENTO*",$("pagto").value,"",
     "*📍 RECEBIMENTO*"];
   if(ent==="Entrega"){
-    m.push("Entrega no endereço:",v("rua"),`${v("bairro")} - ${v("cidade")}`);
+    m.push("Entrega no endereço:",`${v("rua")}, ${v("num")}${v("comp")?" - "+v("comp"):""}`,`Bairro: ${v("bairro")}`,`${v("cidade")} - ${v("uf")}${v("cep")?" | CEP "+v("cep"):""}`);
     if(v("ref")) m.push("Referência: "+v("ref"));
   } else m.push("Vou retirar na loja");
   if(v("obs")) m.push("","*📝 OBSERVAÇÕES*",v("obs"));
   m.push("","Aguardo a confirmação. Obrigado!");
   const txt=encodeURIComponent(m.join("\n"));
   const url=CONFIG.whatsapp?`https://wa.me/${CONFIG.whatsapp}?text=${txt}`:`${CONFIG.link}?text=${txt}`;
-  const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();
+  window.location.href=url;
 };
 chips();grid();render();
 </script>
